@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug API Connection</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 20px; border: 1px solid #ccc; }
+        button { padding: 10px 20px; margin: 5px; }
+        .response { margin-top: 10px; padding: 10px; background: #f0f0f0; }
+        .error { background: #ffebee; color: #c62828; }
+        .success { background: #e8f5e8; color: #2e7d32; }
+        .info { background: #e3f2fd; color: #1565c0; }
+    </style>
+</head>
+<body>
+    <h1>Debug API Connection</h1>
+    
+    <div class="test-section">
+        <h2>Test Backend Connection</h2>
+        <button onclick="testBackend()">Test Backend</button>
+        <div id="backend-result" class="response"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test Frontend Configuration</h2>
+        <button onclick="testFrontendConfig()">Test Frontend Config</button>
+        <div id="frontend-result" class="response"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test Portfolio AI Assistant</h2>
+        <button onclick="testPortfolioAI()">Test Portfolio AI</button>
+        <div id="portfolio-result" class="response"></div>
+    </div>
+
+    <script>
+        // Same configuration as your portfolio
+        const BACKEND_URL = window.location.hostname === 'localhost' 
+            ? 'http://localhost:3001/api/chat'  // Local development
+            : '/api/chat';                       // Vercel deployment
+        
+        const USE_BACKEND = true;
+        const GEMINI_API_KEY = 'AIzaSyDr62O2OODhj2Tm5LS8n5Ktc1ky5EkM134';
+        
+        async function testBackend() {
+            const resultDiv = document.getElementById('backend-result');
+            resultDiv.innerHTML = 'Testing backend connection...';
+            resultDiv.className = 'response info';
+            
+            try {
+                console.log('🔍 Testing backend URL:', BACKEND_URL);
+                
+                const response = await fetch(BACKEND_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query: 'Tell me about your experience' })
+                });
+                
+                console.log('📡 Response status:', response.status);
+                console.log('📡 Response headers:', response.headers);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('✅ Backend response:', data);
+                    resultDiv.innerHTML = `<strong>✅ Backend Working!</strong><br><strong>Response:</strong> ${data.response}`;
+                    resultDiv.className = 'response success';
+                } else {
+                    const errorText = await response.text();
+                    console.error('❌ Backend error:', errorText);
+                    resultDiv.innerHTML = `<strong>❌ Backend Error ${response.status}</strong><br>${errorText}`;
+                    resultDiv.className = 'response error';
+                }
+            } catch (error) {
+                console.error('❌ Network error:', error);
+                resultDiv.innerHTML = `<strong>❌ Network Error:</strong><br>${error.message}`;
+                resultDiv.className = 'response error';
+            }
+        }
+        
+        function testFrontendConfig() {
+            const resultDiv = document.getElementById('frontend-result');
+            
+            const config = {
+                BACKEND_URL,
+                USE_BACKEND,
+                GEMINI_API_KEY: GEMINI_API_KEY.substring(0, 20) + '...',
+                hostname: window.location.hostname,
+                protocol: window.location.protocol,
+                port: window.location.port
+            };
+            
+            resultDiv.innerHTML = `<strong>📋 Frontend Configuration:</strong><br><pre>${JSON.stringify(config, null, 2)}</pre>`;
+            resultDiv.className = 'response info';
+        }
+        
+        async function testPortfolioAI() {
+            const resultDiv = document.getElementById('portfolio-result');
+            resultDiv.innerHTML = 'Testing portfolio AI...';
+            resultDiv.className = 'response info';
+            
+            try {
+                // Simulate the exact same call your portfolio makes
+                const response = await fetch(BACKEND_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        query: 'Tell me about your experience',
+                        conversationHistory: []
+                    })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    resultDiv.innerHTML = `<strong>✅ Portfolio AI Working!</strong><br><strong>Response:</strong> ${data.response}`;
+                    resultDiv.className = 'response success';
+                } else {
+                    const errorText = await response.text();
+                    resultDiv.innerHTML = `<strong>❌ Portfolio AI Error ${response.status}</strong><br>${errorText}`;
+                    resultDiv.className = 'response error';
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<strong>❌ Portfolio AI Error:</strong><br>${error.message}`;
+                resultDiv.className = 'response error';
+            }
+        }
+        
+        // Auto-test on load
+        window.addEventListener('load', () => {
+            console.log('🚀 Debug page loaded');
+            console.log('🔧 Backend URL:', BACKEND_URL);
+            console.log('🌐 Current hostname:', window.location.hostname);
+        });
+    </script>
+</body>
+</html> 
