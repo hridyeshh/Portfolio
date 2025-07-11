@@ -166,8 +166,358 @@
     </div>
 
     <script>
-        // ... JavaScript from your provided HTML ...
-
-</script>
+        const API_ENDPOINT = '/api/chat';
+        const BACKEND_URL = window.location.hostname === 'localhost' 
+            ? 'http://localhost:3001/api/chat'
+            : '/api/chat';
+        
+        let testResults = {};
+        
+        function log(message, type = 'info') {
+            const badge = {
+                'success': '✅',
+                'error': '❌',
+                'warning': '⚠️',
+                'info': 'ℹ️'
+            };
+            return `${badge[type]} ${message}`;
+        }
+        
+        async function checkEnvironment() {
+            const resultDiv = document.getElementById('env-result');
+            resultDiv.innerHTML = '';
+            resultDiv.className = 'result info';
+            
+            const envData = {
+                url: window.location.href,
+                hostname: window.location.hostname,
+                protocol: window.location.protocol,
+                isVercel: window.location.hostname.includes('vercel.app'),
+                apiEndpoint: BACKEND_URL,
+                userAgent: navigator.userAgent,
+                timestamp: new Date().toISOString()
+            };
+            
+            resultDiv.innerHTML = log('Environment Information:', 'info') + '\n';
+            Object.entries(envData).forEach(([key, value]) => {
+                resultDiv.innerHTML += `${key}: ${value}\n`;
+            });
+            
+            if (envData.isVercel) {
+                resultDiv.innerHTML += '\n' + log('Running on Vercel Production', 'success');
+            } else {
+                resultDiv.innerHTML += '\n' + log('Running in Local Development', 'warning');
+            }
+            
+            testResults.environment = envData;
+        }
+        
+        async function testDirectAPI() {
+            const resultDiv = document.getElementById('api-result');
+            resultDiv.innerHTML = log('Testing Direct API Call...', 'info');
+            resultDiv.className = 'result info';
+            
+            try {
+                const startTime = Date.now();
+                
+                const requestBody = {
+                    query: 'What is your experience at Limeroad?',
+                    conversationHistory: []
+                };
+                
+                resultDiv.innerHTML += '\n\n' + log('Request:', 'info');
+                resultDiv.innerHTML += '\n' + JSON.stringify(requestBody, null, 2);
+                
+                const response = await fetch(BACKEND_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(requestBody)
+                });
+                
+                const responseTime = Date.now() - startTime;
+                const responseText = await response.text();
+                
+                resultDiv.innerHTML += '\n\n' + log(`Response Status: ${response.status}`, response.ok ? 'success' : 'error');
+                resultDiv.innerHTML += '\n' + log(`Response Time: ${responseTime}ms`, 'info');
+                resultDiv.innerHTML += '\n' + log('Response Headers:', 'info');
+                response.headers.forEach((value, key) => {
+                    resultDiv.innerHTML += `\n  ${key}: ${value}`;
+                });
+                
+                let data;
+                try {
+                    data = JSON.parse(responseText);
+                    resultDiv.innerHTML += '\n\n' + log('Response Body:', 'info');
+                    resultDiv.innerHTML += '\n' + JSON.stringify(data, null, 2);
+                    
+                    // Check response quality
+                    if (data.response) {
+                        const hasLimeroad = data.response.toLowerCase().includes('limeroad');
+                        const hasFuzzy = data.response.toLowerCase().includes('fuzzy');
+                        const hasGeneric = data.response.includes('passionate about creating elegant solutions');
+                        
+                        resultDiv.innerHTML += '\n\n' + log('Response Analysis:', 'info');
+                        resultDiv.innerHTML += '\n  Contains "Limeroad": ' + (hasLimeroad ? '✅' : '❌');
+                        resultDiv.innerHTML += '\n  Contains "fuzzy": ' + (hasFuzzy ? '✅' : '❌');
+                        resultDiv.innerHTML += '\n  Is Generic Response: ' + (hasGeneric ? '❌ YES' : '✅ NO');
+                        
+                        if (hasGeneric || data.fallback) {
+                            resultDiv.className = 'result error';
+                            resultDiv.innerHTML += '\n\n' + log('API is returning FALLBACK response!', 'error');
+                            resultDiv.innerHTML += '\n' + log('This means:', 'error');
+                            resultDiv.innerHTML += '\n  1. GEMINI_API_KEY is not set in Vercel environment variables';
+                            resultDiv.innerHTML += '\n  2. OR the API key is invalid';
+                            resultDiv.innerHTML += '\n  3. OR Gemini API is returning an error';
+                        } else if (hasLimeroad || hasFuzzy) {
+                            resultDiv.className = 'result success';
+                            resultDiv.innerHTML += '\n\n' + log('API is working correctly with trained responses!', 'success');
+                        }
+                    }
+                } catch (e) {
+                    resultDiv.innerHTML += '\n\n' + log('Failed to parse JSON:', 'error');
+                    resultDiv.innerHTML += '\n' + responseText;
+                    resultDiv.className = 'result error';
+                }
+                
+                testResults.directAPI = { response, data, responseTime };
+                
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML += '\n\n' + log(`Network Error: ${error.message}`, 'error');
+                testResults.directAPI = { error: error.message };
+            }
+        }
+        
+        async function simulateFrontend() {
+            const resultDiv = document.getElementById('frontend-result');
+            resultDiv.innerHTML = log('Simulating Frontend Call...', 'info');
+            resultDiv.className = 'result info';
+            
+            try {
+                // Simulate exactly what your frontend does
+                const GEMINI_API_KEY = 'AIzaSyDr62O2OODhj2Tm5LS8n5Ktc1ky5EkM134';
+                const USE_BACKEND = true;
+                
+                resultDiv.innerHTML += '\n\n' + log('Frontend Configuration:', 'info');
+                resultDiv.innerHTML += '\n  USE_BACKEND: ' + USE_BACKEND;
+                resultDiv.innerHTML += '\n  BACKEND_URL: ' + BACKEND_URL;
+                resultDiv.innerHTML += '\n  Has API Key: ' + (!!GEMINI_API_KEY);
+                
+                if (USE_BACKEND) {
+                    resultDiv.innerHTML += '\n\n' + log('Calling Backend API...', 'info');
+                    
+                    const response = await fetch(BACKEND_URL, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ 
+                            query: 'Tell me about your experience',
+                            conversationHistory: []
+                        })
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`Backend request failed: ${response.status}`);
+                    }
+                    
+                    const data = await response.json();
+                    resultDiv.innerHTML += '\n\n' + log('Backend Response:', 'success');
+                    resultDiv.innerHTML += '\n' + data.response.substring(0, 200) + '...';
+                    
+                    if (data.response.includes('passionate about creating elegant solutions')) {
+                        resultDiv.className = 'result error';
+                        resultDiv.innerHTML += '\n\n' + log('Frontend received GENERIC response!', 'error');
+                    } else {
+                        resultDiv.className = 'result success';
+                        resultDiv.innerHTML += '\n\n' + log('Frontend received TRAINED response!', 'success');
+                    }
+                } else {
+                    resultDiv.innerHTML += '\n\n' + log('Would use direct Gemini API (not backend)', 'warning');
+                }
+                
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML += '\n\n' + log(`Frontend Error: ${error.message}`, 'error');
+                resultDiv.innerHTML += '\n' + log('Frontend would use FALLBACK response', 'error');
+                
+                const fallback = "I'm Hridyesh Kumar, a software developer passionate about creating elegant solutions. Feel free to explore my portfolio or contact me directly!";
+                resultDiv.innerHTML += '\n\nFallback: ' + fallback;
+            }
+        }
+        
+        async function analyzeResponses() {
+            const resultDiv = document.getElementById('analysis-result');
+            resultDiv.innerHTML = log('Analyzing All Test Results...', 'info');
+            resultDiv.className = 'result info';
+            
+            // Test multiple queries
+            const testQueries = [
+                'What is your experience?',
+                'Tell me about Limeroad',
+                'What are your skills?',
+                'Tell me about your projects'
+            ];
+            
+            resultDiv.innerHTML += '\n\n' + log('Testing Multiple Queries:', 'info');
+            
+            for (const query of testQueries) {
+                try {
+                    const response = await fetch(BACKEND_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ query, conversationHistory: [] })
+                    });
+                    
+                    const data = await response.json();
+                    const isGeneric = data.response.includes('passionate about creating elegant solutions');
+                    const isFallback = data.fallback === true;
+                    
+                    resultDiv.innerHTML += `\n\nQuery: "${query}"`;
+                    resultDiv.innerHTML += `\n  Status: ${response.status}`;
+                    resultDiv.innerHTML += `\n  Generic: ${isGeneric ? '❌ YES' : '✅ NO'}`;
+                    resultDiv.innerHTML += `\n  Fallback: ${isFallback ? '❌ YES' : '✅ NO'}`;
+                    resultDiv.innerHTML += `\n  Preview: ${data.response.substring(0, 80)}...`;
+                    
+                } catch (error) {
+                    resultDiv.innerHTML += `\n\nQuery: "${query}"`;
+                    resultDiv.innerHTML += `\n  Error: ${error.message}`;
+                }
+            }
+            
+            resultDiv.innerHTML += '\n\n' + log('Summary:', 'info');
+            resultDiv.innerHTML += '\nIf all responses are generic/fallback, the issue is:';
+            resultDiv.innerHTML += '\n  1. GEMINI_API_KEY not set in Vercel environment';
+            resultDiv.innerHTML += '\n  2. Need to redeploy after adding environment variable';
+            resultDiv.innerHTML += '\n  3. Or API key is invalid/expired';
+        }
+        
+        async function testRawRequest() {
+            const resultDiv = document.getElementById('raw-result');
+            resultDiv.innerHTML = log('Sending Raw Request to Vercel Function...', 'info');
+            resultDiv.className = 'result info';
+            
+            try {
+                // Test with a very specific query that should trigger trained response
+                const testQuery = 'Tell me specifically about your fuzzy search implementation at Limeroad';
+                
+                const response = await fetch(BACKEND_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Debug': 'true'
+                    },
+                    body: JSON.stringify({
+                        query: testQuery,
+                        conversationHistory: [],
+                        debug: true
+                    })
+                });
+                
+                const responseData = await response.text();
+                
+                resultDiv.innerHTML += '\n\nRaw Response Status: ' + response.status;
+                resultDiv.innerHTML += '\n\nRaw Response Body:\n' + responseData;
+                
+                try {
+                    const parsed = JSON.parse(responseData);
+                    
+                    if (parsed.debug) {
+                        resultDiv.innerHTML += '\n\n' + log('Debug Information:', 'info');
+                        resultDiv.innerHTML += '\n' + JSON.stringify(parsed.debug, null, 2);
+                    }
+                    
+                    // Check for specific keywords that indicate trained response
+                    const keywords = ['fuzzy', 'Levenshtein', '95%', 'Limeroad', 'MVVM'];
+                    const foundKeywords = keywords.filter(k => 
+                        parsed.response && parsed.response.toLowerCase().includes(k.toLowerCase())
+                    );
+                    
+                    resultDiv.innerHTML += '\n\n' + log('Keyword Analysis:', 'info');
+                    resultDiv.innerHTML += '\n  Expected keywords: ' + keywords.join(', ');
+                    resultDiv.innerHTML += '\n  Found keywords: ' + (foundKeywords.length > 0 ? foundKeywords.join(', ') : 'NONE');
+                    
+                    if (foundKeywords.length === 0) {
+                        resultDiv.className = 'result error';
+                        resultDiv.innerHTML += '\n\n' + log('NOT getting trained responses!', 'error');
+                    } else {
+                        resultDiv.className = 'result success';
+                        resultDiv.innerHTML += '\n\n' + log('Getting trained responses!', 'success');
+                    }
+                    
+                } catch (e) {
+                    // Response is not JSON
+                }
+                
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML += '\n\n' + log(`Error: ${error.message}`, 'error');
+            }
+        }
+        
+        function testWithCurl() {
+            const resultDiv = document.getElementById('raw-result');
+            const query = 'Tell me about your experience at Limeroad';
+            
+            const curlCommand = `curl -X POST ${window.location.origin}/api/chat \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "query": "${query}",
+    "conversationHistory": []
+  }'`;
+            
+            resultDiv.innerHTML = log('Test with this cURL command:', 'info');
+            resultDiv.innerHTML += '\n\n<div class="code-block">' + curlCommand + '</div>';
+            resultDiv.innerHTML += '\n\nRun this in your terminal to test the API directly.';
+            resultDiv.className = 'result info';
+        }
+        
+        async function showDebugInfo() {
+            const resultDiv = document.getElementById('debug-info');
+            resultDiv.innerHTML = log('Debug Information:', 'info');
+            resultDiv.className = 'result info';
+            
+            const debugInfo = {
+                'Current URL': window.location.href,
+                'API Endpoint': BACKEND_URL,
+                'Is Vercel': window.location.hostname.includes('vercel.app'),
+                'Protocol': window.location.protocol,
+                'Timestamp': new Date().toISOString()
+            };
+            
+            resultDiv.innerHTML += '\n\n<strong>Environment:</strong>';
+            Object.entries(debugInfo).forEach(([key, value]) => {
+                resultDiv.innerHTML += `\n  ${key}: ${value}`;
+            });
+            
+            resultDiv.innerHTML += '\n\n<strong>Troubleshooting Steps:</strong>';
+            resultDiv.innerHTML += '\n  1. Go to Vercel Dashboard → Your Project → Settings → Environment Variables';
+            resultDiv.innerHTML += '\n  2. Add GEMINI_API_KEY = AIzaSyDr62O2OODhj2Tm5LS8n5Ktc1ky5EkM134';
+            resultDiv.innerHTML += '\n  3. Make sure all environments are checked (Production, Preview, Development)';
+            resultDiv.innerHTML += '\n  4. Click Save';
+            resultDiv.innerHTML += '\n  5. Go to Deployments → Redeploy latest deployment';
+            resultDiv.innerHTML += '\n  6. Wait for deployment to complete';
+            resultDiv.innerHTML += '\n  7. Test again';
+            
+            resultDiv.innerHTML += '\n\n<strong>Common Issues:</strong>';
+            resultDiv.innerHTML += '\n  • Environment variable not saved properly';
+            resultDiv.innerHTML += '\n  • Forgot to redeploy after adding env variable';
+            resultDiv.innerHTML += '\n  • API key is invalid or has wrong permissions';
+            resultDiv.innerHTML += '\n  • Typo in environment variable name (must be GEMINI_API_KEY)';
+            
+            resultDiv.innerHTML += '\n\n<strong>Check Vercel Function Logs:</strong>';
+            resultDiv.innerHTML += '\n  1. Go to Vercel Dashboard → Functions tab';
+            resultDiv.innerHTML += '\n  2. Click on "chat" function';
+            resultDiv.innerHTML += '\n  3. Check the logs for any errors';
+            resultDiv.innerHTML += '\n  4. Look for "GEMINI_API_KEY not found" message';
+        }
+        
+        // Auto-run environment check on load
+        window.addEventListener('load', () => {
+            checkEnvironment();
+        });
+    </script>
 </body>
 </html> 
