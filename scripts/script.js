@@ -277,7 +277,7 @@ function initContactSection() {
             // Backend approach (recommended)
             try {
                 console.log('🤖 Calling backend API...');
-                const response = await fetch(`${BACKEND_URL}/api/chat`, {
+                const response = await fetch(`${BACKEND_URL}`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
