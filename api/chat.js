@@ -1,35 +1,50 @@
-const express = require('express');
-const cors = require('cors');
-require('dotenv').config();
+// Vercel Serverless Function for AI Chat
+export default async function handler(req, res) {
+    // Enable CORS
+    res.setHeader('Access-Control-Allow-Credentials', true);
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET,DELETE,PATCH,POST,PUT');
+    res.setHeader(
+        'Access-Control-Allow-Headers',
+        'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
+    );
 
-const app = express();
+    // Handle preflight requests
+    if (req.method === 'OPTIONS') {
+        res.status(200).end();
+        return;
+    }
 
-// Enable CORS for your frontend
-const allowedOrigins = process.env.ALLOWED_ORIGINS 
-    ? process.env.ALLOWED_ORIGINS.split(',') 
-    : ['http://localhost:8000', 'http://127.0.0.1:8000', 'https://your-portfolio-domain.com'];
+    // Only allow POST requests
+    if (req.method !== 'POST') {
+        return res.status(405).json({ error: 'Method not allowed' });
+    }
 
-app.use(cors({
-    origin: function (origin, callback) {
-        // Allow requests with no origin (like mobile apps or curl requests)
-        if (!origin) return callback(null, true);
+    try {
+        const { query, conversationHistory = [] } = req.body;
         
-        if (allowedOrigins.indexOf(origin) !== -1) {
-            callback(null, true);
-        } else {
-            callback(new Error('Not allowed by CORS'));
+        // Validate input
+        if (!query || typeof query !== 'string' || query.trim().length === 0) {
+            return res.status(400).json({ error: 'Query is required' });
         }
-    },
-    credentials: true
-}));
-app.use(express.json());
+        
+        if (query.length > 500) {
+            return res.status(400).json({ error: 'Query too long (max 500 characters)' });
+        }
 
-// Gemini API configuration
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
+        // Gemini API configuration
+        const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+        const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
 
-// Portfolio context - customize this with your complete information
-const portfolioContext = `
+        if (!GEMINI_API_KEY) {
+            return res.status(500).json({ 
+                error: 'API key not configured',
+                fallback: true 
+            });
+        }
+
+        // Portfolio context - same as your local backend
+        const portfolioContext = `
 You are Hridyesh Kumar's AI assistant. You represent me professionally to recruiters, hiring managers, and potential collaborators. Always respond as if you ARE me, using "I" statements. Be confident, specific, and highlight measurable achievements.
 
 RESPONSE STYLE:
@@ -180,49 +195,6 @@ RESPONSE GUIDELINES:
 - Encourage exploration of portfolio sections or direct contact for detailed discussions
 `;
 
-// Rate limiting (optional but recommended)
-const requestCounts = new Map();
-const RATE_LIMIT = 100; // requests per hour per IP
-const RATE_WINDOW = 60 * 60 * 1000; // 1 hour in milliseconds
-
-function checkRateLimit(ip) {
-    const now = Date.now();
-    const userRequests = requestCounts.get(ip) || [];
-    
-    // Filter out old requests
-    const recentRequests = userRequests.filter(time => now - time < RATE_WINDOW);
-    
-    if (recentRequests.length >= RATE_LIMIT) {
-        return false;
-    }
-    
-    recentRequests.push(now);
-    requestCounts.set(ip, recentRequests);
-    return true;
-}
-
-// Chat endpoint
-app.post('/api/chat', async (req, res) => {
-    // Rate limiting
-    const clientIp = req.ip || req.connection.remoteAddress;
-    if (!checkRateLimit(clientIp)) {
-        return res.status(429).json({ 
-            error: 'Rate limit exceeded. Please try again later.' 
-        });
-    }
-    
-    try {
-        const { query, conversationHistory = [] } = req.body;
-        
-        // Validate input
-        if (!query || typeof query !== 'string' || query.trim().length === 0) {
-            return res.status(400).json({ error: 'Query is required' });
-        }
-        
-        if (query.length > 500) {
-            return res.status(400).json({ error: 'Query too long (max 500 characters)' });
-        }
-        
         // Build conversation context
         let conversationContext = '';
         if (conversationHistory.length > 0) {
@@ -329,35 +301,4 @@ app.post('/api/chat', async (req, res) => {
             fallback: true
         });
     }
-});
-
-// Health check endpoint
-app.get('/health', (req, res) => {
-    res.json({ 
-        status: 'OK',
-        model: 'gemini-1.5-flash',
-        apiKeyConfigured: !!GEMINI_API_KEY,
-        timestamp: new Date().toISOString()
-    });
-});
-
-// Start server
-const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => {
-    console.log(`
-    🚀 Portfolio AI Backend Server Started!
-    
-    📍 Server running on: http://localhost:${PORT}
-    🤖 Using model: Gemini 1.5 Flash
-    🔑 API Key status: ${GEMINI_API_KEY ? '✅ Configured' : '❌ Missing - Add to .env file'}
-    
-    📝 Endpoints:
-    - POST /api/chat - Chat with AI
-    - GET /health - Health check
-    
-    💡 Next steps:
-    1. Make sure GEMINI_API_KEY is in your .env file
-    2. Update CORS origin for your domain
-    3. Test with: curl -X POST http://localhost:${PORT}/api/chat -H "Content-Type: application/json" -d '{"query":"Hello"}'
-    `);
-}); 
+} 
