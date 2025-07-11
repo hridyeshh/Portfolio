@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vercel API Deep Debugger</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 20px;
+            background: #0a0a0a;
+            color: #fff;
+        }
+        .debug-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .debug-card {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+        }
+        .full-width {
+            grid-column: 1 / -1;
+        }
+        h1 {
+            color: #fff;
+            margin-bottom: 30px;
+            font-size: 2rem;
+        }
+        h2 {
+            color: #fff;
+            font-size: 1.2rem;
+            margin-bottom: 16px;
+        }
+        button {
+            background: #0070f3;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        button:hover {
+            background: #0051cc;
+        }
+        button:disabled {
+            background: #666;
+            cursor: not-allowed;
+        }
+        .result {
+            margin-top: 16px;
+            padding: 16px;
+            background: #0a0a0a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-size: 13px;
+            white-space: pre-wrap;
+            word-break: break-all;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .success {
+            border-color: #10b981;
+            background: #064e3b;
+        }
+        .error {
+            border-color: #ef4444;
+            background: #7f1d1d;
+        }
+        .warning {
+            border-color: #f59e0b;
+            background: #78350f;
+        }
+        .info {
+            border-color: #3b82f6;
+            background: #1e3a8a;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-right: 8px;
+        }
+        .status-success { background: #10b981; color: #fff; }
+        .status-error { background: #ef4444; color: #fff; }
+        .status-warning { background: #f59e0b; color: #000; }
+        .status-info { background: #3b82f6; color: #fff; }
+        .code-block {
+            background: #000;
+            padding: 12px;
+            border-radius: 6px;
+            margin: 8px 0;
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-size: 12px;
+            overflow-x: auto;
+        }
+        .metric {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #333;
+        }
+        .metric:last-child {
+            border-bottom: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 Vercel API Deep Debugger</h1>
+    
+    <div class="debug-container">
+        <!-- Environment Check -->
+        <div class="debug-card">
+            <h2>1. Environment Check</h2>
+            <button onclick="checkEnvironment()">Run Environment Check</button>
+            <div id="env-result" class="result"></div>
+        </div>
+        
+        <!-- Direct API Test -->
+        <div class="debug-card">
+            <h2>2. Direct API Test</h2>
+            <button onclick="testDirectAPI()">Test Direct API Call</button>
+            <div id="api-result" class="result"></div>
+        </div>
+        
+        <!-- Frontend Simulation -->
+        <div class="debug-card">
+            <h2>3. Frontend Simulation</h2>
+            <button onclick="simulateFrontend()">Simulate Frontend Call</button>
+            <div id="frontend-result" class="result"></div>
+        </div>
+        
+        <!-- Response Analysis -->
+        <div class="debug-card">
+            <h2>4. Response Analysis</h2>
+            <button onclick="analyzeResponses()">Analyze All Responses</button>
+            <div id="analysis-result" class="result"></div>
+        </div>
+        
+        <!-- Raw Request Tester -->
+        <div class="debug-card full-width">
+            <h2>5. Raw Request Tester</h2>
+            <button onclick="testRawRequest()">Send Raw Request</button>
+            <button onclick="testWithCurl()">Show cURL Command</button>
+            <div id="raw-result" class="result"></div>
+        </div>
+        
+        <!-- Vercel Function Logs -->
+        <div class="debug-card full-width">
+            <h2>6. Debug Information</h2>
+            <button onclick="showDebugInfo()">Show Debug Info</button>
+            <div id="debug-info" class="result"></div>
+        </div>
+    </div>
+
+    <script>
+        // ... JavaScript from your provided HTML ...
+
+</script>
+</body>
+</html> 
