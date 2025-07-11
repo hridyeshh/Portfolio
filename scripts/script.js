@@ -188,7 +188,9 @@ function initContactSection() {
     const aiResponseArea = document.querySelector('.ai-response-area');
     
     // Configuration - Update these values
-    const BACKEND_URL = '/api/chat'; // Vercel API endpoint (relative URL)
+    const BACKEND_URL = window.location.hostname === 'localhost' 
+        ? 'http://localhost:3001/api/chat'  // Local development
+        : '/api/chat';                       // Vercel deployment
     const USE_BACKEND = true; // Set to false for client-side only (less secure)
     const GEMINI_API_KEY = 'AIzaSyDr62O2OODhj2Tm5LS8n5Ktc1ky5EkM134'; // Only used if USE_BACKEND is false
     
