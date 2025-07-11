@@ -1,0 +1,42 @@
+
+1 RESUME CONTENT:
+
+EDUCATION:
+Bachelor of Technology in Mathematics and Computing from Netaji Subhas University of Technology (2025)
+
+EXPERIENCE:
+Software Development Intern at Limeroad (Feb 2025 - Aug 2025) and College Setu (May 2024 - July 2024)
+
+SKILLS:
+Java, Kotlin, React, React Native, Node.js, TypeScript, SQL, JavaScript, HTML, CSS, Material Design, Android SDK, Git, GitHub, Docker
+
+PROJECTS:
+FurniAR (AR furniture app), Neural Network Routing for VANETs, Email Oasis, Poem Generator, Quantum Computing project
+
+ACHIEVEMENTS:
+Authored 23-page research paper on Grover's algorithm, Co-authored 13-page journal article on VANET routing protocol
+
+CONTACT INFORMATION:
+- Email: hridyesh2309@gmail.com
+- GitHub: github.com/hridyeshh
+- LinkedIn: linkedin.com/in/hridyeshh
+- LeetCode: leetcode.com/hridyeshh
+- Mobile: +91 81302 52611
+
+KEY METRICS & ACHIEVEMENTS:
+- 95% search accuracy with <50ms response times at Limeroad
+- 50k+ users served with optimized payment processing workflows
+- 30% screen transition speed improvement in FurniAR app
+- 20% backend response time reduction through database optimization
+- 20% latency reduction and 15% efficiency improvement in VANET routing
+- 23-page research paper on quantum computing optimization
+- 13-page journal article on hybrid VANET routing protocol
+- 3+ on-campus presentations to faculty
+
+TECHNICAL EXPERTISE:
+- Mobile Development: Kotlin, Java, Android SDK, Material Design, MVVM, ARCore
+- Web Development: React, React Native, TypeScript, JavaScript, HTML/CSS
+- Backend Development: Node.js, Python, Flask, SQL, RESTful APIs
+- Machine Learning: Neural Networks, Reinforcement Learning, Python
+- Developer Tools: Git, GitHub, Docker, Android Studio, IntelliJ, PyCharm
+- Research: Quantum Computing, VANET routing, Algorithm optimization
