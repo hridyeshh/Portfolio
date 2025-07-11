@@ -7,7 +7,7 @@ const app = express();
 // Enable CORS for your frontend
 const allowedOrigins = process.env.ALLOWED_ORIGINS 
     ? process.env.ALLOWED_ORIGINS.split(',') 
-    : ['http://localhost:8000', 'http://127.0.0.1:8000', 'https://your-portfolio-domain.com'];
+    : ['http://localhost:8000', 'http://localhost:3000', 'http://127.0.0.1:8000', 'http://127.0.0.1:3000', 'https://your-portfolio-domain.com'];
 
 app.use(cors({
     origin: function (origin, callback) {
