@@ -91,7 +91,7 @@ A modern, interactive portfolio website featuring an AI-powered chat assistant. 
 ### AI Chat
 
 - Go to the Contact section (“Let’s connect.”)
-- Type your question in the search bar (e.g., “What experience do you have at Limeroad?”)
+- Type your question in the search bar (e.g., “What experience do you have at any_company?”)
 - Receive a formatted answer with a summary and bullet points, with numbers highlighted in yellow
 
 ### Resume & Contact
