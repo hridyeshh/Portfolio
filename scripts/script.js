@@ -460,6 +460,62 @@ function initContactSection() {
         }
     }
     
+    // Suggested questions for dropdown
+    const suggestedQuestions = [
+        "Tell me about your experience at Limeroad",
+        "What are your technical skills?",
+        "Tell me about your projects",
+        "What makes you unique?",
+        "Tell me about your Amazon experience",
+        "What are your achievements?",
+        "Tell me about your education",
+        "What are your interests?"
+    ];
+    
+    // Create dropdown for suggested questions
+    function createSuggestedQuestionsDropdown() {
+        const dropdown = document.createElement('div');
+        dropdown.className = 'suggested-questions-dropdown';
+        dropdown.style.display = 'none';
+        
+        suggestedQuestions.forEach(question => {
+            const questionItem = document.createElement('div');
+            questionItem.className = 'suggested-question-item';
+            questionItem.textContent = question;
+            questionItem.addEventListener('click', () => {
+                searchInput.value = question;
+                dropdown.style.display = 'none';
+                handleSearch();
+            });
+            dropdown.appendChild(questionItem);
+        });
+        
+        return dropdown;
+    }
+    
+    // Add dropdown to search wrapper
+    const dropdown = createSuggestedQuestionsDropdown();
+    const searchWrapper = document.querySelector('.search-wrapper');
+    if (searchWrapper) {
+        searchWrapper.appendChild(dropdown);
+    }
+    
+    // Show/hide dropdown on input focus/blur
+    searchInput?.addEventListener('focus', () => {
+        if (dropdown) {
+            dropdown.style.display = 'block';
+        }
+    });
+    
+    searchInput?.addEventListener('blur', () => {
+        // Delay hiding to allow clicking on suggestions
+        setTimeout(() => {
+            if (dropdown) {
+                dropdown.style.display = 'none';
+            }
+        }, 200);
+    });
+    
     // Search event listeners
     searchButton?.addEventListener('click', handleSearch);
     searchInput?.addEventListener('keypress', (e) => {
