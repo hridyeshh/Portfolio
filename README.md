@@ -8,7 +8,6 @@ A modern, interactive portfolio website featuring an AI-powered chat assistant. 
 
 - **AI Chat Assistant**:  
   - Ask anything about Hridyesh’s background, skills, or projects  
-  - Answers are formatted as a summary paragraph and bullet points, with numbers highlighted  
   - Supports Markdown rendering for rich, readable responses
 
 - **Dynamic Experience & Projects**:  
@@ -92,7 +91,6 @@ A modern, interactive portfolio website featuring an AI-powered chat assistant. 
 
 - Go to the Contact section (“Let’s connect.”)
 - Type your question in the search bar (e.g., “What experience do you have at any_company?”)
-- Receive a formatted answer with a summary and bullet points, with numbers highlighted in yellow
 
 ### Resume & Contact
 
@@ -108,9 +106,6 @@ A modern, interactive portfolio website featuring an AI-powered chat assistant. 
 
 - **AI-Powered Answers**:  
   - Short summary paragraph  
-  - Bullet points for clarity  
-  - Numbers bold and highlighted in yellow  
-  - Markdown support for rich formatting
 
 - **Responsive & Animated UI**:  
   - Custom cursor, smooth section transitions, and mobile support
