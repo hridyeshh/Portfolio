@@ -278,7 +278,6 @@ function initContactSection() {
         if (USE_BACKEND) {
             // Backend approach (recommended)
             try {
-                console.log('🤖 Calling backend API...');
                 const response = await fetch(`${BACKEND_URL}`, {
                     method: 'POST',
                     headers: {
@@ -291,16 +290,14 @@ function initContactSection() {
                 });
                 
                 if (!response.ok) {
-                    console.error('❌ Backend response not OK:', response.status);
                     throw new Error(`Backend request failed: ${response.status}`);
                 }
                 
                 const data = await response.json();
-                console.log('✅ Backend response received:', data.response.substring(0, 100) + '...');
                 return data.response;
                 
             } catch (error) {
-                console.error('❌ Backend Error:', error);
+                console.error('Backend Error:', error);
                 throw error;
             }
         } else {
@@ -396,36 +393,30 @@ function initContactSection() {
         typeResponse();
     }
     
-    // Handle search
+        // Handle search
     async function handleSearch() {
         const query = searchInput?.value.trim();
         if (!query || !aiResponseArea) return;
         
-        console.log('🔍 Search query:', query);
-        console.log('🌐 Backend URL:', BACKEND_URL);
-        console.log('⚙️ Using backend:', USE_BACKEND);
-        
-        // Show loading
-        aiResponseArea.innerHTML = `
-            <div class="loading-dots">
-                <span></span>
-                <span></span>
-                <span></span>
-            </div>
-        `;
-        aiResponseArea.classList.add('active');
-        
-        searchButton.disabled = true;
-        searchInput.disabled = true;
-        
         try {
+            // Show loading
+            aiResponseArea.innerHTML = `
+                <div class="loading-dots">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            `;
+            aiResponseArea.classList.add('active');
+            
+            if (searchButton) searchButton.disabled = true;
+            if (searchInput) searchInput.disabled = true;
+        
             let response;
             
             // Try Gemini API first
             if (GEMINI_API_KEY !== 'YOUR_GEMINI_API_KEY' || USE_BACKEND) {
-                console.log('🚀 Calling AI API...');
                 response = await callGeminiAPI(query);
-                console.log('📝 AI Response received:', response.substring(0, 100) + '...');
                 
                 // Update conversation history
                 conversationHistory.push(
@@ -439,7 +430,6 @@ function initContactSection() {
                 }
             } else {
                 // Use fallback if no API key configured
-                console.log('🔄 Using fallback response');
                 response = getFallbackResponse(query);
             }
             
@@ -447,85 +437,22 @@ function initContactSection() {
             displayResponse(response);
             
         } catch (error) {
-            console.error('❌ Error in handleSearch:', error);
-            console.log('🔄 Falling back to local response');
+            console.error('Error in handleSearch:', error);
             // Use fallback on error
             const fallback = getFallbackResponse(query);
             displayResponse(fallback);
         } finally {
-            searchButton.disabled = false;
-            searchInput.disabled = false;
-            searchInput.value = '';
-            searchInput.focus();
-        }
-    }
-    
-    // Suggested questions for dropdown
-    const suggestedQuestions = [
-        "Tell me about your experience at Limeroad",
-        "What are your technical skills?",
-        "Tell me about your projects",
-        "What makes you unique?",
-        "Tell me about your Amazon experience",
-        "What are your achievements?",
-        "Tell me about your education",
-        "What are your interests?"
-    ];
-    
-    // Create dropdown for suggested questions
-    function createSuggestedQuestionsDropdown() {
-        const dropdown = document.createElement('div');
-        dropdown.className = 'suggested-questions-dropdown';
-        dropdown.style.display = 'none';
-        
-        suggestedQuestions.forEach(question => {
-            const questionItem = document.createElement('div');
-            questionItem.className = 'suggested-question-item';
-            questionItem.textContent = question;
-            questionItem.addEventListener('click', () => {
-                searchInput.value = question;
-                dropdown.style.display = 'none';
-                handleSearch();
-            });
-            dropdown.appendChild(questionItem);
-        });
-        
-        return dropdown;
-    }
-    
-    // Add dropdown to search wrapper
-    const dropdown = createSuggestedQuestionsDropdown();
-    const searchWrapper = document.querySelector('.search-wrapper');
-    if (searchWrapper) {
-        searchWrapper.appendChild(dropdown);
-    }
-    
-    // Show/hide dropdown on input focus/blur
-    searchInput?.addEventListener('focus', () => {
-        if (dropdown) {
-            dropdown.style.display = 'block';
-            // Hide contact icons when dropdown is shown
-            if (contactIconsContainer) {
-                contactIconsContainer.style.opacity = '0';
-                contactIconsContainer.style.transform = 'translateY(20px)';
+            if (searchButton) searchButton.disabled = false;
+            if (searchInput) searchInput.disabled = false;
+            if (searchInput) {
+                searchInput.value = '';
+                searchInput.focus();
             }
         }
-    });
+    }
     
-    searchInput?.addEventListener('blur', () => {
-        // Delay hiding to allow clicking on suggestions
-        setTimeout(() => {
-            if (dropdown) {
-                dropdown.style.display = 'none';
-                // Show contact icons when dropdown is hidden
-                if (contactIconsContainer) {
-                    contactIconsContainer.style.opacity = '1';
-                    contactIconsContainer.style.transform = 'translateY(0)';
-                }
-            }
-        }, 200);
-    });
-    
+
+
     // Search event listeners
     searchButton?.addEventListener('click', handleSearch);
     searchInput?.addEventListener('keypress', (e) => {
