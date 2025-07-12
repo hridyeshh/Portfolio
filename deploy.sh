@@ -1,107 +1,96 @@
 #!/bin/bash
 
-echo "🚀 Portfolio AI Deployment Helper"
-echo "================================"
-echo ""
+# 🚀 AI Portfolio Deployment Script
+# This script helps you deploy your AI-powered portfolio to Vercel
+
+echo "🚀 Starting AI Portfolio Deployment..."
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+# Function to print colored output
+print_status() {
+    echo -e "${BLUE}[INFO]${NC} $1"
+}
+
+print_success() {
+    echo -e "${GREEN}[SUCCESS]${NC} $1"
+}
+
+print_warning() {
+    echo -e "${YELLOW}[WARNING]${NC} $1"
+}
+
+print_error() {
+    echo -e "${RED}[ERROR]${NC} $1"
+}
 
 # Check if git is initialized
 if [ ! -d ".git" ]; then
-    echo "❌ Git repository not found. Please initialize git first:"
-    echo "   git init"
-    echo "   git add ."
-    echo "   git commit -m 'Initial commit'"
-    echo "   git remote add origin https://github.com/yourusername/your-repo.git"
-    echo "   git push -u origin main"
-    exit 1
+    print_status "Initializing git repository..."
+    git init
+    print_success "Git repository initialized"
+else
+    print_status "Git repository already exists"
 fi
 
-# Check if backend files exist
-if [ ! -f "backend/server.js" ]; then
-    echo "❌ Backend files not found. Make sure you're in the project root directory."
-    exit 1
+# Add all files
+print_status "Adding files to git..."
+git add .
+print_success "Files added to git"
+
+# Commit changes
+print_status "Committing changes..."
+git commit -m "AI Portfolio ready for Vercel deployment with trained responses"
+print_success "Changes committed"
+
+# Check if remote exists
+if ! git remote get-url origin > /dev/null 2>&1; then
+    print_warning "No remote repository configured"
+    echo ""
+    echo "📋 Next Steps:"
+    echo "1. Create a new repository on GitHub"
+    echo "2. Run: git remote add origin https://github.com/YOUR_USERNAME/Portfolio.git"
+    echo "3. Run: git push -u origin main"
+    echo ""
+    echo "🌐 Then deploy to Vercel:"
+    echo "1. Go to https://vercel.com"
+    echo "2. Import your GitHub repository"
+    echo "3. Add environment variable: GEMINI_API_KEY = AIzaSyDr62O2OODhj2Tm5LS8n5Ktc1ky5EkM134"
+    echo "4. Deploy!"
+    echo ""
+else
+    print_status "Pushing to remote repository..."
+    git push origin main
+    print_success "Code pushed to GitHub"
+    
+    echo ""
+    echo "🎉 Code pushed successfully!"
+    echo ""
+    echo "🌐 Deploy to Vercel:"
+    echo "1. Go to https://vercel.com"
+    echo "2. Import your GitHub repository"
+    echo "3. Add environment variable: GEMINI_API_KEY = AIzaSyDr62O2OODhj2Tm5LS8n5Ktc1ky5EkM134"
+    echo "4. Deploy!"
+    echo ""
 fi
 
-echo "✅ Repository structure looks good!"
+echo "📋 Important Files:"
+echo "✅ api/chat.js - Vercel serverless function with trained AI"
+echo "✅ package.json - Dependencies for Vercel"
+echo "✅ vercel.json - Vercel configuration"
+echo "✅ index.html - Your portfolio frontend"
 echo ""
 
-echo "📋 Deployment Checklist:"
-echo "========================"
+echo "🧪 Test Questions for AI:"
+echo "- 'Tell me about your experience at Amazon'"
+echo "- 'What are your technical skills?'"
+echo "- 'Tell me about your projects'"
+echo "- 'What makes you unique?'"
 echo ""
 
-echo "1. 🔧 Backend Deployment (Render)"
-echo "   - Go to https://render.com"
-echo "   - Sign up and connect GitHub"
-echo "   - Create new Web Service"
-echo "   - Configure:"
-echo "     • Name: portfolio-ai-backend"
-echo "     • Build Command: npm install"
-echo "     • Start Command: npm start"
-echo "     • Root Directory: backend"
-echo "   - Add Environment Variables:"
-echo "     • GEMINI_API_KEY: your_actual_api_key"
-echo "     • NODE_ENV: production"
-echo "   - Deploy and copy the URL"
-echo ""
-
-echo "2. 🔄 Update Frontend Configuration"
-echo "   - Open scripts/script.js"
-echo "   - Find line ~150: BACKEND_URL"
-echo "   - Replace with your Render URL"
-echo "   - Commit and push changes"
-echo ""
-
-echo "3. 🌐 Frontend Deployment (Vercel)"
-echo "   - Go to https://vercel.com"
-echo "   - Sign up and connect GitHub"
-echo "   - Import your repository"
-echo "   - Deploy (auto-detects static site)"
-echo "   - Copy your domain URL"
-echo ""
-
-echo "4. 🔒 Update CORS Settings"
-echo "   - Go back to Render dashboard"
-echo "   - Add environment variable:"
-echo "     • ALLOWED_ORIGINS: your-vercel-domain.vercel.app,http://localhost:8000"
-echo "   - Redeploy backend"
-echo ""
-
-echo "5. 🧪 Test Everything"
-echo "   - Visit your Vercel domain"
-echo "   - Go to contact section"
-echo "   - Try asking the AI assistant questions"
-echo ""
-
-echo "📝 Quick Commands:"
-echo "=================="
-echo ""
-
-echo "# Push latest changes"
-echo "git add ."
-echo "git commit -m 'Update for deployment'"
-echo "git push"
-echo ""
-
-echo "# Test backend locally"
-echo "cd backend"
-echo "GEMINI_API_KEY=your_key node server.js"
-echo ""
-
-echo "# Test frontend locally"
-echo "python3 -m http.server 8000"
-echo ""
-
-echo "🎯 Your trained AI model will work on the hosted website!"
-echo "   The same responses you get locally will be available online."
-echo ""
-
-echo "💡 Pro Tips:"
-echo "============="
-echo "• Use different API keys for dev/prod"
-echo "• Monitor your API usage"
-echo "• Set up alerts for downtime"
-echo "• Consider a custom domain"
-echo ""
-
-echo "📚 Full guide: DEPLOYMENT_GUIDE.md"
-echo "🔗 Render: https://render.com"
-echo "🔗 Vercel: https://vercel.com" 
+print_success "Deployment script completed! Follow the steps above to deploy to Vercel." 
