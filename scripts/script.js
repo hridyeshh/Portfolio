@@ -504,6 +504,11 @@ function initContactSection() {
     searchInput?.addEventListener('focus', () => {
         if (dropdown) {
             dropdown.style.display = 'block';
+            // Hide contact icons when dropdown is shown
+            if (contactIconsContainer) {
+                contactIconsContainer.style.opacity = '0';
+                contactIconsContainer.style.transform = 'translateY(20px)';
+            }
         }
     });
     
@@ -512,6 +517,11 @@ function initContactSection() {
         setTimeout(() => {
             if (dropdown) {
                 dropdown.style.display = 'none';
+                // Show contact icons when dropdown is hidden
+                if (contactIconsContainer) {
+                    contactIconsContainer.style.opacity = '1';
+                    contactIconsContainer.style.transform = 'translateY(0)';
+                }
             }
         }, 200);
     });
