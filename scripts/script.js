@@ -18,8 +18,8 @@ function animateCursor() {
     const dx = mouseX - cursorX;
     const dy = mouseY - cursorY;
     
-    cursorX += dx * 0.2; // Smooth following speed
-    cursorY += dy * 0.2;
+    cursorX += dx * 0.5; // Smooth following speed
+    cursorY += dy * 0.5;
     
     // Apply transform (center the cursor on mouse position)
     cursor.style.transform = `translate(${cursorX - 20}px, ${cursorY - 20}px)`;
