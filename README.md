@@ -24,6 +24,7 @@ A modern, interactive portfolio website featuring an AI-powered chat assistant. 
 
 - **API Integration**:  
   - Node.js backend with Gemini AI API  
+  - GitHub API integration for real-time project data
   - Local and Vercel deployment support  
   - Rate limiting and fallback responses for reliability
 
@@ -68,13 +69,14 @@ A modern, interactive portfolio website featuring an AI-powered chat assistant. 
    ```
 
 3. **Configure environment variables**:
-   - Copy the example file and fill in your Gemini API key:
+   - Copy the example file and fill in your API keys:
      ```bash
      cp backend/env.example backend/.env
      ```
    - Edit `.env`:
      ```
      GEMINI_API_KEY=your_google_gemini_api_key
+     GITHUB_TOKEN=your_github_personal_access_token  # Optional but recommended
      ```
 
 4. **Start the local server**:

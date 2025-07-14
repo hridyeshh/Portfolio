@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
+const GitHubAPI = require('./github-api');
 
 const app = express();
 
@@ -180,6 +181,35 @@ RESPONSE GUIDELINES:
 - Encourage exploration of portfolio sections or direct contact for detailed discussions
 `;
 
+// Initialize GitHub API
+const githubAPI = new GitHubAPI();
+
+// Cache GitHub data to avoid hitting rate limits
+let cachedGitHubData = null;
+let lastGitHubFetch = 0;
+const GITHUB_CACHE_DURATION = 30 * 60 * 1000; // 30 minutes
+
+async function getGitHubData() {
+    const now = Date.now();
+    
+    // Return cached data if it's still fresh
+    if (cachedGitHubData && (now - lastGitHubFetch) < GITHUB_CACHE_DURATION) {
+        return cachedGitHubData;
+    }
+    
+    try {
+        const data = await githubAPI.getComprehensiveData();
+        if (data) {
+            cachedGitHubData = data;
+            lastGitHubFetch = now;
+        }
+        return data;
+    } catch (error) {
+        console.error('Error fetching GitHub data:', error);
+        return cachedGitHubData; // Return stale data if available
+    }
+}
+
 // Rate limiting (optional but recommended)
 const requestCounts = new Map();
 const RATE_LIMIT = 100; // requests per hour per IP
@@ -200,6 +230,30 @@ function checkRateLimit(ip) {
     requestCounts.set(ip, recentRequests);
     return true;
 }
+
+// GitHub data endpoint
+app.get('/api/github', async (req, res) => {
+    try {
+        const data = await getGitHubData();
+        if (data) {
+            res.json({
+                success: true,
+                data: data
+            });
+        } else {
+            res.status(500).json({
+                success: false,
+                error: 'Failed to fetch GitHub data'
+            });
+        }
+    } catch (error) {
+        console.error('GitHub endpoint error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Internal server error'
+        });
+    }
+});
 
 // Chat endpoint
 app.post('/api/chat', async (req, res) => {
@@ -258,11 +312,23 @@ app.post('/api/chat', async (req, res) => {
             }
         }
         
+        // Get live GitHub data for enhanced context
+        let githubContext = '';
+        try {
+            const githubData = await getGitHubData();
+            if (githubData) {
+                githubContext = githubAPI.formatForAIContext(githubData);
+            }
+        } catch (error) {
+            console.error('Error fetching GitHub data for chat:', error);
+            // Continue without GitHub data if it fails
+        }
+        
         // Prepare Gemini API request
         const requestBody = {
             contents: [{
                 parts: [{
-                    text: `${portfolioContext}${conversationContext}${companyFocus}\n\nUser: ${query}\n\nAssistant:`
+                    text: `${portfolioContext}${conversationContext}${companyFocus}${githubContext}\n\nUser: ${query}\n\nAssistant:`
                 }]
             }],
             generationConfig: {

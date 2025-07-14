@@ -1,6 +1,89 @@
 // Vercel Serverless Function for AI Chat
 const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 
+// GitHub API integration (simplified for serverless)
+class GitHubAPI {
+    constructor() {
+        this.baseURL = 'https://api.github.com';
+        this.username = 'hridyeshh';
+        this.token = process.env.GITHUB_TOKEN;
+        this.headers = {
+            'Accept': 'application/vnd.github.v3+json',
+            'User-Agent': 'Portfolio-AI-Assistant'
+        };
+        
+        if (this.token) {
+            this.headers['Authorization'] = `token ${this.token}`;
+        }
+    }
+
+    async makeRequest(endpoint) {
+        try {
+            const response = await fetch(`${this.baseURL}${endpoint}`, {
+                headers: this.headers
+            });
+            
+            if (!response.ok) {
+                throw new Error(`GitHub API error: ${response.status}`);
+            }
+            
+            return await response.json();
+        } catch (error) {
+            console.error('GitHub API request failed:', error);
+            return null;
+        }
+    }
+
+    async getBasicData() {
+        try {
+            const [profile, repositories] = await Promise.all([
+                this.makeRequest(`/users/${this.username}`),
+                this.makeRequest(`/users/${this.username}/repos?sort=updated&per_page=10`)
+            ]);
+
+            if (!profile || !repositories) return null;
+
+            return {
+                profile,
+                repositories: repositories.slice(0, 5),
+                summary: {
+                    totalRepositories: profile.public_repos,
+                    followers: profile.followers,
+                    following: profile.following,
+                    accountCreated: profile.created_at
+                }
+            };
+        } catch (error) {
+            console.error('Error fetching basic GitHub data:', error);
+            return null;
+        }
+    }
+
+    formatForAIContext(data) {
+        if (!data) return '';
+
+        const { profile, repositories, summary } = data;
+        
+        let context = `\n\nLIVE GITHUB DATA:\n`;
+        context += `GitHub Profile: ${profile.html_url}\n`;
+        context += `Followers: ${summary.followers} | Following: ${summary.following}\n`;
+        context += `Public Repositories: ${summary.totalRepositories}\n\n`;
+
+        context += `RECENT REPOSITORIES:\n`;
+        repositories.forEach((repo, index) => {
+            const lastUpdated = new Date(repo.updated_at).toLocaleDateString();
+            
+            context += `${index + 1}. ${repo.name}\n`;
+            context += `   Description: ${repo.description || 'No description'}\n`;
+            context += `   Stars: ${repo.stargazers_count} | Forks: ${repo.forks_count}\n`;
+            context += `   Last Updated: ${lastUpdated}\n`;
+            context += `   URL: ${repo.html_url}\n\n`;
+        });
+
+        return context;
+    }
+}
+
 module.exports = async function handler(req, res) {
     // Enable CORS
     res.setHeader('Access-Control-Allow-Credentials', true);
@@ -45,7 +128,6 @@ module.exports = async function handler(req, res) {
             });
         }
 
-        // Portfolio context - same as your local backend
         const portfolioContext = `
 You are Hridyesh Kumar's AI assistant. You represent me professionally to recruiters, hiring managers, and potential collaborators. Always respond as if you ARE me, using "I" statements. Be confident, specific, and highlight measurable achievements.
 
@@ -232,11 +314,24 @@ RESPONSE GUIDELINES:
             }
         }
         
+        // Get live GitHub data for enhanced context
+        let githubContext = '';
+        try {
+            const githubAPI = new GitHubAPI();
+            const githubData = await githubAPI.getBasicData();
+            if (githubData) {
+                githubContext = githubAPI.formatForAIContext(githubData);
+            }
+        } catch (error) {
+            console.error('Error fetching GitHub data for chat:', error);
+            // Continue without GitHub data if it fails
+        }
+        
         // Prepare Gemini API request
         const requestBody = {
             contents: [{
                 parts: [{
-                    text: `${portfolioContext}${conversationContext}${companyFocus}\n\nUser: ${query}\n\nAssistant:`
+                    text: `${portfolioContext}${conversationContext}${companyFocus}${githubContext}\n\nUser: ${query}\n\nAssistant:`
                 }]
             }],
             generationConfig: {

@@ -4,6 +4,107 @@ const cors = require('cors');
 require('dotenv').config();
 const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 
+// GitHub API integration (simplified for local server)
+// Simple cache for GitHub data
+let githubCache = null;
+let lastGitHubFetch = 0;
+const GITHUB_CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
+class GitHubAPI {
+    constructor() {
+        this.baseURL = 'https://api.github.com';
+        this.username = 'hridyeshh';
+        this.token = process.env.GITHUB_TOKEN;
+        this.headers = {
+            'Accept': 'application/vnd.github.v3+json',
+            'User-Agent': 'Portfolio-AI-Assistant'
+        };
+        
+        if (this.token) {
+            this.headers['Authorization'] = `token ${this.token}`;
+        }
+    }
+
+    async makeRequest(endpoint) {
+        try {
+            const response = await fetch(`${this.baseURL}${endpoint}`, {
+                headers: this.headers
+            });
+            
+            if (!response.ok) {
+                throw new Error(`GitHub API error: ${response.status}`);
+            }
+            
+            return await response.json();
+        } catch (error) {
+            console.error('GitHub API request failed:', error);
+            return null;
+        }
+    }
+
+    async getBasicData() {
+        const now = Date.now();
+        
+        // Return cached data if it's still fresh
+        if (githubCache && (now - lastGitHubFetch) < GITHUB_CACHE_DURATION) {
+            return githubCache;
+        }
+        
+        try {
+            const [profile, repositories] = await Promise.all([
+                this.makeRequest(`/users/${this.username}`),
+                this.makeRequest(`/users/${this.username}/repos?sort=updated&per_page=10`)
+            ]);
+
+            if (!profile || !repositories) return null;
+
+            const data = {
+                profile,
+                repositories: repositories.slice(0, 5),
+                summary: {
+                    totalRepositories: profile.public_repos,
+                    followers: profile.followers,
+                    following: profile.following,
+                    accountCreated: profile.created_at
+                }
+            };
+            
+            // Cache the data
+            githubCache = data;
+            lastGitHubFetch = now;
+            
+            return data;
+        } catch (error) {
+            console.error('Error fetching basic GitHub data:', error);
+            return githubCache; // Return stale cache if available
+        }
+    }
+
+    formatForAIContext(data) {
+        if (!data) return '';
+
+        const { profile, repositories, summary } = data;
+        
+        let context = `\n\nLIVE GITHUB DATA:\n`;
+        context += `GitHub Profile: ${profile.html_url}\n`;
+        context += `Followers: ${summary.followers} | Following: ${summary.following}\n`;
+        context += `Public Repositories: ${summary.totalRepositories}\n\n`;
+
+        context += `RECENT REPOSITORIES:\n`;
+        repositories.forEach((repo, index) => {
+            const lastUpdated = new Date(repo.updated_at).toLocaleDateString();
+            
+            context += `${index + 1}. ${repo.name}\n`;
+            context += `   Description: ${repo.description || 'No description'}\n`;
+            context += `   Stars: ${repo.stargazers_count} | Forks: ${repo.forks_count}\n`;
+            context += `   Last Updated: ${lastUpdated}\n`;
+            context += `   URL: ${repo.html_url}\n\n`;
+        });
+
+        return context;
+    }
+}
+
 const app = express();
 
 // Enable CORS
@@ -213,34 +314,32 @@ app.post('/api/chat', async (req, res) => {
                 conversationContext += `${msg.role}: ${msg.content}\n`;
             });
         }
-        // Detect company-specific queries
-        const companyKeywords = {
-            'amazon': ['amazon', 'aws', 'customer', 'scalability'],
-            'ibm': ['ibm', 'enterprise', 'ai/ml', 'research'],
-            'oracle': ['oracle', 'database', 'cloud', 'enterprise'],
-            'natwest': ['natwest', 'financial', 'banking', 'security'],
-            'lji': ['lji', 'innovation', 'problem-solving'],
-            'recro': ['recro', 'startup', 'agile', 'rapid']
-        };
-        let companyFocus = '';
-        const queryLower = query.toLowerCase();
-        for (const [company, keywords] of Object.entries(companyKeywords)) {
-            if (keywords.some(keyword => queryLower.includes(keyword))) {
-                companyFocus = `\n\nCOMPANY FOCUS: ${company.toUpperCase()}\nWhen responding, emphasize aspects relevant to ${company}: `;
-                if (company === 'amazon') companyFocus += 'customer-centric approach, scalability, AWS technologies';
-                else if (company === 'ibm') companyFocus += 'enterprise solutions, AI/ML, research capabilities';
-                else if (company === 'oracle') companyFocus += 'database expertise, enterprise software, cloud technologies';
-                else if (company === 'natwest') companyFocus += 'financial technology, security, regulatory compliance';
-                else if (company === 'lji') companyFocus += 'innovation, problem-solving, technical excellence';
-                else if (company === 'recro') companyFocus += 'rapid development, startup experience, agile methodologies';
-                break;
+        
+        // Get live GitHub data for enhanced context (with caching)
+        let githubContext = '';
+        
+        // Only fetch GitHub data for relevant queries to improve speed
+        const githubKeywords = ['github', 'repository', 'repo', 'commit', 'project', 'code', 'recent'];
+        const shouldFetchGitHub = githubKeywords.some(keyword => query.toLowerCase().includes(keyword));
+        
+        if (shouldFetchGitHub) {
+            try {
+                const githubAPI = new GitHubAPI();
+                const githubData = await githubAPI.getBasicData();
+                if (githubData) {
+                    githubContext = githubAPI.formatForAIContext(githubData);
+                }
+            } catch (error) {
+                console.error('Error fetching GitHub data for chat:', error);
+                // Continue without GitHub data if it fails
             }
         }
+        
         // Prepare Gemini API request
         const requestBody = {
             contents: [{
                 parts: [{
-                    text: `${portfolioContext}${conversationContext}${companyFocus}\n\nUser: ${query}\n\nAssistant:`
+                    text: `${portfolioContext}${conversationContext}${githubContext}\n\nUser: ${query}\n\nAssistant:`
                 }]
             }],
             generationConfig: {
@@ -276,6 +375,7 @@ app.post('/api/chat', async (req, res) => {
             },
             body: JSON.stringify(requestBody)
         });
+        
         if (!response.ok) {
             const errorData = await response.json();
             console.error('Gemini API Error:', errorData);
@@ -301,10 +401,35 @@ app.post('/api/chat', async (req, res) => {
     }
 });
 
+// GitHub data endpoint
+app.get('/api/github', async (req, res) => {
+    try {
+        const githubAPI = new GitHubAPI();
+        const data = await githubAPI.getBasicData();
+        if (data) {
+            res.json({
+                success: true,
+                data: data
+            });
+        } else {
+            res.status(500).json({
+                success: false,
+                error: 'Failed to fetch GitHub data'
+            });
+        }
+    } catch (error) {
+        console.error('GitHub endpoint error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Internal server error'
+        });
+    }
+});
+
 const PORT = 8000;
 app.listen(PORT, () => {
     console.log(`🚀 Local server running on http://localhost:${PORT}`);
     console.log(`📁 Serving static files from current directory`);
     console.log(`🔗 Test API at http://localhost:${PORT}/api/chat`);
     console.log(`🧪 Test page at http://localhost:${PORT}/test_api.html`);
-}); 
+});
