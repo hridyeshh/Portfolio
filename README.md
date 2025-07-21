@@ -1,4 +1,4 @@
-#AI-Powered Portfolio
+# AI-Powered Portfolio
 
 A modern, interactive portfolio website featuring an AI-powered chat assistant. Users can ask questions about Hridyesh’s experience, skills, and projects, and receive context-aware, beautifully formatted answers. Built with custom HTML, CSS, and JavaScript, and powered by a Node.js backend with Google Gemini AI integration.
 
