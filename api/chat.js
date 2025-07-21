@@ -1,7 +1,55 @@
 // Vercel Serverless Function for AI Chat
 const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
+const crypto = require('crypto');
 
-// GitHub API integration (simplified for serverless)
+// Advanced caching system with hashing
+class CacheManager {
+    constructor() {
+        this.cache = new Map();
+        this.cacheExpiry = new Map();
+        this.defaultTTL = 5 * 60 * 1000; // 5 minutes
+    }
+
+    // Generate hash-based cache key
+    generateCacheKey(endpoint, params = {}) {
+        const data = JSON.stringify({ endpoint, params });
+        return crypto.createHash('md5').update(data).digest('hex');
+    }
+
+    // Get cached data if valid
+    get(key) {
+        const expiry = this.cacheExpiry.get(key);
+        if (expiry && Date.now() < expiry) {
+            return this.cache.get(key);
+        }
+        // Remove expired cache
+        this.cache.delete(key);
+        this.cacheExpiry.delete(key);
+        return null;
+    }
+
+    // Set cache with TTL
+    set(key, data, ttl = this.defaultTTL) {
+        this.cache.set(key, data);
+        this.cacheExpiry.set(key, Date.now() + ttl);
+    }
+
+    // Clear expired entries
+    cleanup() {
+        const now = Date.now();
+        for (const [key, expiry] of this.cacheExpiry.entries()) {
+            if (now > expiry) {
+                this.cache.delete(key);
+                this.cacheExpiry.delete(key);
+            }
+        }
+    }
+}
+
+// Global cache instance
+const cacheManager = new CacheManager();
+
+// GitHub API integration with advanced caching
 class GitHubAPI {
     constructor() {
         this.baseURL = 'https://api.github.com';
@@ -17,7 +65,18 @@ class GitHubAPI {
         }
     }
 
-    async makeRequest(endpoint) {
+    async makeRequest(endpoint, useCache = true) {
+        const cacheKey = cacheManager.generateCacheKey(endpoint);
+        
+        // Try cache first
+        if (useCache) {
+            const cached = cacheManager.get(cacheKey);
+            if (cached) {
+                console.log(`Cache hit for ${endpoint}`);
+                return cached;
+            }
+        }
+
         try {
             const response = await fetch(`${this.baseURL}${endpoint}`, {
                 headers: this.headers
@@ -27,7 +86,15 @@ class GitHubAPI {
                 throw new Error(`GitHub API error: ${response.status}`);
             }
             
-            return await response.json();
+            const data = await response.json();
+            
+            // Cache successful responses
+            if (useCache) {
+                cacheManager.set(cacheKey, data);
+                console.log(`Cached response for ${endpoint}`);
+            }
+            
+            return data;
         } catch (error) {
             console.error('GitHub API request failed:', error);
             return null;
@@ -35,10 +102,14 @@ class GitHubAPI {
     }
 
     async getBasicData() {
+        // Clean up expired cache entries
+        cacheManager.cleanup();
+        
         try {
+            // Parallel requests with caching
             const [profile, repositories] = await Promise.all([
-                this.makeRequest(`/users/${this.username}`),
-                this.makeRequest(`/users/${this.username}/repos?sort=updated&per_page=10`)
+                this.makeRequest(`/users/${this.username}`, true),
+                this.makeRequest(`/users/${this.username}/repos?sort=updated&per_page=10`, true)
             ]);
 
             if (!profile || !repositories) return null;
@@ -131,6 +202,13 @@ module.exports = async function handler(req, res) {
         const portfolioContext = `
 You are Hridyesh Kumar's AI assistant. You represent me professionally to recruiters, hiring managers, and potential collaborators. Always respond as if you ARE me, using "I" statements. Be confident, specific, and highlight measurable achievements.
 
+CRITICAL RULES:
+- NEVER discuss salary, compensation, CTC, or financial expectations
+- NEVER mention job titles or positions I'm applying for
+- NEVER make up information not in my profile
+- ONLY discuss my actual experience, projects, and skills
+- Keep responses focused on my technical achievements and capabilities
+
 RESPONSE STYLE:
 - Use "I" statements (e.g., "I developed...", "I achieved...")
 - Be specific with numbers, metrics, and technical details
@@ -141,6 +219,15 @@ RESPONSE STYLE:
 
 ABOUT ME:
 I'm Hridyesh Kumar, a software developer with a unique perspective: I believe great code tells a story. My background in productivity literature, poetry, and writing shapes how I approach problem-solving and communication in tech. I see every function as a character, every system as a narrative, and every project as a story worth telling well.
+
+MINDSET & PHILOSOPHY (from my Twitter @hridyeshhh):
+- "Artistic minds craft leadership" - I believe creativity and technical skills go hand in hand
+- "Be a seeker, not a settler" - I'm constantly learning and pushing boundaries
+- "It's always about choices, that show what we truly are, far more than our abilities" - I focus on making the right decisions in development
+- "The art of management lies in the capacity to select from the many activities of seemingly comparable significance the one or two or three that provide leverage well beyond the others" - I prioritize high-impact work
+- "Knowledge isn't free. You have to pay attention" - I believe in deep, focused learning
+- "Escape competition through authenticity" - I bring my unique perspective to every project
+- "The price of productivity is creativity" - I balance efficiency with innovative thinking
 
 PROFESSIONAL EXPERIENCE:
 
@@ -206,77 +293,14 @@ NOTABLE PROJECTS:
 UNIQUE VALUE PROPOSITION:
 I bring a storyteller's perspective to software development. Just as every line of code has a purpose, every function has a role, and every project has a story worth telling well. This approach helps me create code that's not just functional, but also maintainable, readable, and elegant.
 
-MULTI-COMPANY RESUME CONTENT:
-
-You have access to multiple company-specific resume versions. When asked about specific companies, use the relevant resume content.
-
-AVAILABLE COMPANY RESUMES:
-- Amazon
-- IBM
-- Oracle
-- NatWest
-- LJI
-- Recro
-- General
-
-COMPANY-SPECIFIC GUIDELINES:
-- For Amazon: Emphasize customer-centric approach, scalability, and AWS technologies
-- For IBM: Focus on enterprise solutions, AI/ML, and research capabilities
-- For Oracle: Highlight database expertise, enterprise software, and cloud technologies
-- For NatWest: Emphasize financial technology, security, and regulatory compliance
-- For LJI: Focus on innovation, problem-solving, and technical excellence
-- For Recro: Highlight rapid development, startup experience, and agile methodologies
-
-GENERAL RESUME CONTENT:
-
-EDUCATION:
-Bachelor of Technology in Mathematics and Computing from Netaji Subhas University of Technology (2025)
-
-EXPERIENCE:
-Software Development Intern at Limeroad (Feb 2025 - Aug 2025) and College Setu (May 2024 - July 2024)
-
-SKILLS:
-Java, Kotlin, React, React Native, Node.js, TypeScript, SQL, JavaScript, HTML, CSS, Material Design, Android SDK, Git, GitHub, Docker
-
-PROJECTS:
-FurniAR (AR furniture app), Neural Network Routing for VANETs, Email Oasis, Poem Generator, Quantum Computing project
-
-ACHIEVEMENTS:
-Authored 23-page research paper on Grover's algorithm, Co-authored 13-page journal article on VANET routing protocol
+My work ethic is simple: if I start a problem, I finish it. I don't leave my desk until the job is done. This commitment to completion, combined with my storytelling approach to code, ensures that every project I touch reaches its full potential.
 
 CONTACT INFORMATION:
 - Email: hridyesh2309@gmail.com
 - GitHub: github.com/hridyeshh
 - LinkedIn: linkedin.com/in/hridyeshh
 - LeetCode: leetcode.com/hridyeshh
-- Mobile: +91 81302 52611
-
-KEY METRICS & ACHIEVEMENTS:
-- 95% search accuracy with <50ms response times at Limeroad
-- 50k+ users served with optimized payment processing workflows
-- 30% screen transition speed improvement in FurniAR app
-- 20% backend response time reduction through database optimization
-- 20% latency reduction and 15% efficiency improvement in VANET routing
-- 23-page research paper on quantum computing optimization
-- 13-page journal article on hybrid VANET routing protocol
-- 3+ on-campus presentations to faculty
-
-TECHNICAL EXPERTISE:
-- Mobile Development: Kotlin, Java, Android SDK, Material Design, MVVM, ARCore
-- Web Development: React, React Native, TypeScript, JavaScript, HTML/CSS
-- Backend Development: Node.js, Python, Flask, SQL, RESTful APIs
-- Machine Learning: Neural Networks, Reinforcement Learning, Python
-- Developer Tools: Git, GitHub, Docker, Android Studio, IntelliJ, PyCharm
-- Research: Quantum Computing, VANET routing, Algorithm optimization
-
-RESPONSE GUIDELINES:
-- Always speak as Hridyesh Kumar using "I" statements
-- Highlight specific metrics and achievements when relevant
-- Connect technical skills to business impact
-- Show enthusiasm for technology and problem-solving
-- Be confident but humble about capabilities
-- If asked about something not covered, redirect to available information or offer to connect directly
-- Encourage exploration of portfolio sections or direct contact for detailed discussions
+- Twitter: @hridyeshhh (for mindset and thought process)
 `;
 
         // Build conversation context
@@ -287,80 +311,44 @@ RESPONSE GUIDELINES:
                 conversationContext += `${msg.role}: ${msg.content}\n`;
             });
         }
-        
-        // Detect company-specific queries
-        const companyKeywords = {
-            'amazon': ['amazon', 'aws', 'customer', 'scalability'],
-            'ibm': ['ibm', 'enterprise', 'ai/ml', 'research'],
-            'oracle': ['oracle', 'database', 'cloud', 'enterprise'],
-            'natwest': ['natwest', 'financial', 'banking', 'security'],
-            'lji': ['lji', 'innovation', 'problem-solving'],
-            'recro': ['recro', 'startup', 'agile', 'rapid']
-        };
-        
-        let companyFocus = '';
+
+        // Intelligent GitHub data fetching with caching
+        let githubContext = '';
         const queryLower = query.toLowerCase();
         
-        for (const [company, keywords] of Object.entries(companyKeywords)) {
-            if (keywords.some(keyword => queryLower.includes(keyword))) {
-                companyFocus = `\n\nCOMPANY FOCUS: ${company.toUpperCase()}\nWhen responding, emphasize aspects relevant to ${company}: `;
-                if (company === 'amazon') companyFocus += 'customer-centric approach, scalability, AWS technologies';
-                else if (company === 'ibm') companyFocus += 'enterprise solutions, AI/ML, research capabilities';
-                else if (company === 'oracle') companyFocus += 'database expertise, enterprise software, cloud technologies';
-                else if (company === 'natwest') companyFocus += 'financial technology, security, regulatory compliance';
-                else if (company === 'lji') companyFocus += 'innovation, problem-solving, technical excellence';
-                else if (company === 'recro') companyFocus += 'rapid development, startup experience, agile methodologies';
-                break;
+        // Only fetch GitHub data for relevant queries to improve speed
+        const githubKeywords = ['github', 'repository', 'repo', 'commit', 'project', 'code', 'recent'];
+        const shouldFetchGitHub = githubKeywords.some(keyword => queryLower.includes(keyword));
+        
+        if (shouldFetchGitHub) {
+            try {
+                const githubAPI = new GitHubAPI();
+                const githubData = await githubAPI.getBasicData();
+                if (githubData) {
+                    githubContext = githubAPI.formatForAIContext(githubData);
+                }
+            } catch (error) {
+                console.error('Error fetching GitHub data for chat:', error);
+                // Continue without GitHub data if it fails
             }
         }
-        
-        // Get live GitHub data for enhanced context
-        let githubContext = '';
-        try {
-            const githubAPI = new GitHubAPI();
-            const githubData = await githubAPI.getBasicData();
-            if (githubData) {
-                githubContext = githubAPI.formatForAIContext(githubData);
-            }
-        } catch (error) {
-            console.error('Error fetching GitHub data for chat:', error);
-            // Continue without GitHub data if it fails
-        }
-        
-        // Prepare Gemini API request
+
+        // Prepare Gemini API request with optimized context
         const requestBody = {
             contents: [{
                 parts: [{
-                    text: `${portfolioContext}${conversationContext}${companyFocus}${githubContext}\n\nUser: ${query}\n\nAssistant:`
+                    text: `${portfolioContext}${conversationContext}${githubContext}\n\nUser: ${query}\n\nAssistant:`
                 }]
             }],
             generationConfig: {
-                temperature: 0.7,
-                topK: 40,
-                topP: 0.9,
+                temperature: 0.3,
                 maxOutputTokens: 300,
-            },
-            safetySettings: [
-                {
-                    category: "HARM_CATEGORY_HARASSMENT",
-                    threshold: "BLOCK_MEDIUM_AND_ABOVE"
-                },
-                {
-                    category: "HARM_CATEGORY_HATE_SPEECH",
-                    threshold: "BLOCK_MEDIUM_AND_ABOVE"
-                },
-                {
-                    category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
-                    threshold: "BLOCK_MEDIUM_AND_ABOVE"
-                },
-                {
-                    category: "HARM_CATEGORY_DANGEROUS_CONTENT",
-                    threshold: "BLOCK_MEDIUM_AND_ABOVE"
-                }
-            ]
+                topP: 0.6,
+                topK: 20
+            }
         };
-        
-        // Call Gemini API
+
+        // Call Gemini API with timeout
         const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
             method: 'POST',
             headers: {
@@ -374,28 +362,35 @@ RESPONSE GUIDELINES:
             console.error('Gemini API Error:', errorData);
             throw new Error(`Gemini API error: ${response.status}`);
         }
-        
+
         const data = await response.json();
+        let aiResponse = data.candidates[0].content.parts[0].text;
+
+        // Safety check: Filter out inappropriate responses
+        const inappropriateKeywords = ['ctc', 'salary', 'compensation', 'job title', 'position', 'apply', 'application'];
+        const responseLower = aiResponse.toLowerCase();
         
-        // Extract response text
-        const aiResponse = data.candidates[0].content.parts[0].text;
-        
-        // Log for monitoring (optional)
-        console.log(`[${new Date().toISOString()}] Query: "${query}" | Response length: ${aiResponse.length}`);
-        
-        res.json({ 
+        if (inappropriateKeywords.some(keyword => responseLower.includes(keyword))) {
+            console.warn('Inappropriate response detected, regenerating...');
+            aiResponse = "I'd be happy to discuss my technical experience and projects. What specific aspect of my work would you like to know more about?";
+        }
+
+        // Log successful response
+        console.log(`Query: "${query}" | Response length: ${aiResponse.length}`);
+
+        res.status(200).json({
             response: aiResponse,
             model: 'gemini-1.5-flash',
-            timestamp: new Date().toISOString()
+            timestamp: new Date().toISOString(),
+            cacheInfo: shouldFetchGitHub ? 'GitHub data cached for 5 minutes' : 'No GitHub data needed'
         });
-        
+
     } catch (error) {
         console.error('Error in chat endpoint:', error);
-        
         // Send a user-friendly error response
         res.status(500).json({
             error: 'I apologize, but I encountered an issue. Please try again or contact Hridyesh directly at hridyesh2309@gmail.com.',
             fallback: true
         });
     }
-} 
+}; 
