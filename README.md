@@ -7,7 +7,7 @@ A modern, interactive portfolio website featuring an AI-powered chat assistant. 
 ## 🚀 Features
 
 - **AI Chat Assistant**:  
-  - Ask anything about Hridyesh’s background, skills, or projects  
+  - Ask anything about my background, skills, or projects  
   - Supports Markdown rendering for rich, readable responses
 
 - **Dynamic Experience & Projects**:  
