@@ -1,4 +1,4 @@
-# Hridyesh Kumar - AI-Powered Portfolio
+# AI-Powered Portfolio
 
 A modern, interactive portfolio website featuring an AI-powered chat assistant. Users can ask questions about Hridyesh’s experience, skills, and projects, and receive context-aware, beautifully formatted answers. Built with custom HTML, CSS, and JavaScript, and powered by a Node.js backend with Google Gemini AI integration.
 
@@ -7,7 +7,7 @@ A modern, interactive portfolio website featuring an AI-powered chat assistant. 
 ## 🚀 Features
 
 - **AI Chat Assistant**:  
-  - Ask anything about Hridyesh’s background, skills, or projects  
+  - Ask anything about my background, skills, or projects  
   - Supports Markdown rendering for rich, readable responses
 
 - **Dynamic Experience & Projects**:  
