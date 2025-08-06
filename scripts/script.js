@@ -99,6 +99,61 @@ function updateBodyBg() {
     });
 }
 
+// Dynamic contact section background opacity
+function updateContactBgOpacity() {
+    const contactSection = document.querySelector('#contact');
+    const videoBg = document.querySelector('.contact-video-bg');
+    if (!contactSection || !videoBg) {
+        console.log('Contact section or video not found');
+        return;
+    }
+    
+    // Debug video element
+    console.log('Video element found:', videoBg);
+    console.log('Video readyState:', videoBg.readyState);
+    console.log('Video currentSrc:', videoBg.currentSrc);
+    console.log('Video paused:', videoBg.paused);
+    
+    // Ensure video is playing with slow motion
+    if (videoBg.tagName === 'VIDEO') {
+        if (videoBg.paused) {
+            videoBg.play().catch(e => console.log('Video autoplay failed:', e));
+        }
+        // Set playback rate to 0.5 for slow motion
+        videoBg.playbackRate = 0.5;
+    }
+    
+    const rect = contactSection.getBoundingClientRect();
+    const windowHeight = window.innerHeight;
+    
+    // Calculate how much of the contact section is visible
+    const sectionTop = rect.top;
+    const sectionHeight = rect.height;
+    
+    // Custom opacity settings for video background
+    let opacity = 1; // Default full opacity
+    
+    if (sectionTop < windowHeight && sectionTop + sectionHeight > 0) {
+        // Section is visible - calculate scroll-based opacity
+        const visibleHeight = Math.min(windowHeight, sectionTop + sectionHeight) - Math.max(0, sectionTop);
+        const visibilityRatio = visibleHeight / Math.min(windowHeight, sectionHeight);
+        
+        // Custom opacity curve - adjust these values as needed
+        if (document.body.classList.contains('bg-white')) {
+            // White theme - more subtle video presence
+            opacity = Math.max(0.2, Math.min(0.4, visibilityRatio * 0.4));
+        } else {
+            // Black theme - more prominent video
+            opacity = Math.max(0.6, Math.min(1.0, visibilityRatio * 1.2));
+        }
+    }
+    
+    // Apply opacity to video with smooth transition
+    videoBg.style.opacity = opacity;
+    videoBg.style.setProperty('opacity', opacity, 'important');
+    console.log('Video opacity set to:', opacity, 'Theme:', document.body.classList.contains('bg-white') ? 'white' : 'black');
+}
+
 // Hero hands fade out on scroll
 function updateHeroHandsVisibility() {
     const heroSection = document.querySelector('#home');
@@ -150,12 +205,31 @@ function updateHeroBgOpacity() {
 window.addEventListener('scroll', updateBodyBg);
 window.addEventListener('scroll', updateHeroHandsVisibility);
 window.addEventListener('scroll', updateHeroBgOpacity);
+window.addEventListener('scroll', updateContactBgOpacity);
 window.addEventListener('resize', updateBodyBg);
 window.addEventListener('resize', updateHeroHandsVisibility);
 window.addEventListener('resize', updateHeroBgOpacity);
+window.addEventListener('resize', updateContactBgOpacity);
 document.addEventListener('DOMContentLoaded', updateBodyBg);
 document.addEventListener('DOMContentLoaded', updateHeroHandsVisibility);
 document.addEventListener('DOMContentLoaded', updateHeroBgOpacity);
+document.addEventListener('DOMContentLoaded', updateContactBgOpacity);
+
+// Initialize contact video opacity immediately
+document.addEventListener('DOMContentLoaded', () => {
+    const videoBg = document.querySelector('.contact-video-bg');
+    if (videoBg) {
+        // Add video event listeners for debugging
+        videoBg.addEventListener('loadstart', () => console.log('Video loadstart'));
+        videoBg.addEventListener('loadedmetadata', () => console.log('Video loadedmetadata'));
+        videoBg.addEventListener('loadeddata', () => console.log('Video loadeddata'));
+        videoBg.addEventListener('canplay', () => console.log('Video canplay'));
+        videoBg.addEventListener('canplaythrough', () => console.log('Video canplaythrough'));
+        videoBg.addEventListener('error', (e) => console.log('Video error:', e));
+        
+        setTimeout(updateContactBgOpacity, 100); // Small delay to ensure video is loaded
+    }
+});
 
 // Back to Top button functionality
 document.getElementById('backToTop').addEventListener('click', function() {

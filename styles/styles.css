@@ -346,8 +346,8 @@ body.bg-black .btn-primary:hover {
 }
 
 .profile-img {
-    width: 300px;
-    height: 300px;
+    width: 350px;
+    height: 350px;
     border-radius: 50%;
     position: relative;
     overflow: hidden;
@@ -600,6 +600,52 @@ body.bg-black .skill-item:hover {
 }
 
 /* Contact Section */
+section#contact {
+    position: relative;
+    min-height: 100vh;
+    overflow: hidden;
+}
+
+#contact::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.2);
+    z-index: 1;
+    transition: background 0.5s ease;
+}
+
+/* Video Background */
+.contact-video-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 0;
+    opacity: 1 !important;
+    transition: opacity 0.5s ease;
+    background: #000;
+    display: block !important;
+    visibility: visible !important;
+}
+
+/* Fallback image styling */
+.contact-video-bg img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+#contact .section-content {
+    position: relative;
+    z-index: 2;
+}
+
 .contact-container {
     max-width: 800px;
     margin: 0 auto;
@@ -615,6 +661,7 @@ body.bg-black .skill-item:hover {
     margin-bottom: 60px;
     min-height: 1.2em;
     color: #fff;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
 }
 
 .typing-content {
@@ -804,6 +851,7 @@ body.bg-black .ai-response-area {
     border: 2px solid rgba(255, 255, 255, 0.2);
     position: relative;
     overflow: hidden;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
 }
 
 .contact-icon::before {
@@ -969,6 +1017,8 @@ h2 {
     }
 
     .profile-img {
+        width: 250px;
+        height: 250px;
         margin: 0 auto;
     }
 

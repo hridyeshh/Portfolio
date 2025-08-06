@@ -247,7 +247,7 @@ PROFESSIONAL EXPERIENCE:
 TECHNICAL EXPERTISE:
 
 CORE TECHNOLOGIES:
-- Mobile Development: Kotlin, Java, Android SDK, Jetpack Compose, Material Design, MVVM, Clean Architecture
+- Mobile Development: Python, Kotlin, C++, Java, Android SDK, Jetpack Compose, Material Design, MVVM, Clean Architecture
 - Web Development: JavaScript, TypeScript, React, React Native, Node.js, HTML/CSS, Tailwind CSS
 - Backend & Data: Python, SQL, Flask, RESTful APIs, Database Design & Optimization
 - Developer Tools: Git, GitHub, Docker, Android Studio, IntelliJ, PyCharm, JIRA

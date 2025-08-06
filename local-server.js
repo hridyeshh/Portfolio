@@ -383,7 +383,11 @@ app.post('/api/chat', async (req, res) => {
         }
         const data = await response.json();
         // Extract response text
-        const aiResponse = data.candidates[0].content.parts[0].text;
+        let aiResponse = data.candidates[0].content.parts[0].text;
+        
+        // Remove hyphens from the response
+        aiResponse = aiResponse.replace(/[-—–]/g, ' ').replace(/\s+/g, ' ').trim();
+        
         // Log for monitoring (optional)
         console.log(`[${new Date().toISOString()}] Query: "${query}" | Response length: ${aiResponse.length}`);
         res.json({ 
