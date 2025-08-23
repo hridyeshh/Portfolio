@@ -261,12 +261,10 @@ function initContactSection() {
     const searchButton = document.querySelector('.search-button');
     const aiResponseArea = document.querySelector('.ai-response-area');
     
-    // Configuration - Update these values
+    // Configuration - Backend URL
     const BACKEND_URL = window.location.hostname === 'localhost' 
         ? 'http://localhost:8000/api/chat'  // Local development
         : '/api/chat';                       // Vercel deployment
-    const USE_BACKEND = true; // Set to false for client-side only (less secure)
-    const GEMINI_API_KEY = 'AIzaSyDr62O2OODhj2Tm5LS8n5Ktc1ky5EkM134'; // Only used if USE_BACKEND is false
     
     if (!typingContent) return;
     
@@ -347,65 +345,30 @@ function initContactSection() {
         typingObserver.observe(contactSection);
     }
     
-    // Gemini AI Integration
+    // Gemini AI Integration - Backend Only (Secure)
     async function callGeminiAPI(query) {
-        if (USE_BACKEND) {
-            // Backend approach (recommended)
-            try {
-                const response = await fetch(`${BACKEND_URL}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ 
-                        query,
-                        conversationHistory 
-                    })
-                });
-                
-                if (!response.ok) {
-                    throw new Error(`Backend request failed: ${response.status}`);
-                }
-                
-                const data = await response.json();
-                return data.response;
-                
-            } catch (error) {
-                console.error('Backend Error:', error);
-                throw error;
+        try {
+            const response = await fetch(`${BACKEND_URL}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ 
+                    query,
+                    conversationHistory 
+                })
+            });
+            
+            if (!response.ok) {
+                throw new Error(`Backend request failed: ${response.status}`);
             }
-        } else {
-            // Client-side approach (less secure but works)
-            try {
-                const GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
-                
-                const response = await fetch(`${GEMINI_URL}?key=${GEMINI_API_KEY}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        contents: [{
-                            parts: [{
-                                text: `${portfolioContext}\n\nConversation history: ${JSON.stringify(conversationHistory)}\n\nUser: ${query}\n\nAssistant:`
-                            }]
-                        }],
-                        generationConfig: {
-                            temperature: 0.7,
-                            maxOutputTokens: 200,
-                        }
-                    })
-                });
-                
-                if (!response.ok) throw new Error('Gemini API request failed');
-                
-                const data = await response.json();
-                return data.candidates[0].content.parts[0].text;
-                
-            } catch (error) {
-                console.error('Gemini API Error:', error);
-                throw error;
-            }
+            
+            const data = await response.json();
+            return data.response;
+            
+        } catch (error) {
+            console.error('Backend Error:', error);
+            throw error;
         }
     }
     
