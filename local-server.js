@@ -379,6 +379,117 @@ app.post('/api/chat', async (req, res) => {
         if (!response.ok) {
             const errorData = await response.json();
             console.error('Gemini API Error:', errorData);
+            
+            // Handle rate limiting specifically
+            if (response.status === 429) {
+                console.log('Rate limit hit, using intelligent fallback response');
+                
+                // Enhanced intelligent fallback with better keyword matching
+                const queryLower = query.toLowerCase();
+                let fallbackResponse = "I'm experiencing high traffic right now, but I'd be happy to help! ";
+                
+                // Experience and work related
+                if (queryLower.includes('experience') || queryLower.includes('work') || queryLower.includes('intern') || 
+                    queryLower.includes('job') || queryLower.includes('career') || queryLower.includes('background') ||
+                    queryLower.includes('limeroad') || queryLower.includes('college setu') || queryLower.includes('android') ||
+                    queryLower.includes('kotlin') || queryLower.includes('typescript') || queryLower.includes('flask')) {
+                    fallbackResponse += "I'm currently a Software Development Intern at Limeroad, working on Android development with Kotlin and TypeScript. I've also interned at College Setu developing data collection portals with Flask and SQL.";
+                } 
+                // Skills and technology related
+                else if (queryLower.includes('skill') || queryLower.includes('technology') || queryLower.includes('language') ||
+                         queryLower.includes('programming') || queryLower.includes('code') || queryLower.includes('develop') ||
+                         (queryLower.includes('java') && !queryLower.includes('who')) || 
+                         (queryLower.includes('javascript') && !queryLower.includes('who')) || 
+                         (queryLower.includes('react') && !queryLower.includes('who')) ||
+                         (queryLower.includes('android') && !queryLower.includes('who')) || 
+                         (queryLower.includes('sdk') && !queryLower.includes('who')) || 
+                         (queryLower.includes('framework') && !queryLower.includes('who'))) {
+                    fallbackResponse += "My key skills include Java, Kotlin, JavaScript, TypeScript, React, Android SDK, and various development tools. I'm passionate about clean architecture and performance optimization.";
+                    return res.status(200).json({
+                        response: fallbackResponse,
+                        model: 'fallback',
+                        timestamp: new Date().toISOString(),
+                        rateLimited: true
+                    });
+                } 
+                // Who/About questions (MUST come first to avoid conflicts)
+                if (queryLower.includes('who are you') || queryLower.includes('what is your name') || 
+                    queryLower.includes('tell me about yourself') || queryLower.includes('introduce yourself') ||
+                    (queryLower.includes('who') && !queryLower.includes('project')) || 
+                    (queryLower.includes('name') && !queryLower.includes('project')) || 
+                    (queryLower.includes('about') && !queryLower.includes('project'))) {
+                    fallbackResponse += "I'm Hridyesh Kumar, a software developer passionate about creating elegant solutions. I believe great code tells a story and approach every project with creativity and technical rigor. I love productivity literature, poetry, and writing!";
+                    return res.status(200).json({
+                        response: fallbackResponse,
+                        model: 'fallback',
+                        timestamp: new Date().toISOString(),
+                        rateLimited: true
+                    });
+                }
+                // Personal and interests related (MUST come before projects to avoid conflicts)
+                else if (queryLower.includes('hobby') || queryLower.includes('hobbies') || queryLower.includes('like') || 
+                         queryLower.includes('passion') || queryLower.includes('interest') || queryLower.includes('poetry') || 
+                         queryLower.includes('writing') || queryLower.includes('literature') || queryLower.includes('productivity') ||
+                         queryLower.includes('personal') || queryLower.includes('life') || queryLower.includes('outside')) {
+                    fallbackResponse += "I'm Hridyesh Kumar, a software developer passionate about creating elegant solutions. I love productivity literature, poetry, and writing - these interests shape how I approach problem-solving and communication in tech. Every line of code tells a story!";
+                    return res.status(200).json({
+                        response: fallbackResponse,
+                        model: 'fallback',
+                        timestamp: new Date().toISOString(),
+                        rateLimited: true
+                    });
+                } 
+                // Projects and work related
+                else if (queryLower.includes('project') || queryLower.includes('build') || queryLower.includes('create') ||
+                         queryLower.includes('app') || queryLower.includes('application') || queryLower.includes('developed') ||
+                         queryLower.includes('email oasis') || queryLower.includes('furniar') || queryLower.includes('quantum') ||
+                         queryLower.includes('vanet') || queryLower.includes('poem generator') || queryLower.includes('ar')) {
+                    fallbackResponse += "I've built projects like Email Oasis (Gmail subscription manager), FurniAR (AR furniture app), Neural Network Routing for VANETs, Poem Generator with AI, and a Quantum Computing optimization project. Check out my Projects section for more details!";
+                    return res.status(200).json({
+                        response: fallbackResponse,
+                        model: 'fallback',
+                        timestamp: new Date().toISOString(),
+                        rateLimited: true
+                    });
+                } 
+                // Contact and communication related
+                else if (queryLower.includes('contact') || queryLower.includes('email') || queryLower.includes('reach') ||
+                         queryLower.includes('message') || queryLower.includes('connect') || queryLower.includes('linkedin') ||
+                         queryLower.includes('github') || queryLower.includes('leetcode') || queryLower.includes('resume')) {
+                    fallbackResponse += "You can reach me at hridyesh2309@gmail.com, connect on LinkedIn (hridyeshh), check out my code on GitHub (hridyeshh), or see my problem-solving skills on LeetCode.";
+                    return res.status(200).json({
+                        response: fallbackResponse,
+                        model: 'fallback',
+                        timestamp: new Date().toISOString(),
+                        rateLimited: true
+                    });
+                } 
+
+                // Education and learning related
+                else if (queryLower.includes('education') || queryLower.includes('study') || queryLower.includes('learn') ||
+                         queryLower.includes('university') || queryLower.includes('college') || queryLower.includes('degree') ||
+                         queryLower.includes('course') || queryLower.includes('training')) {
+                    fallbackResponse += "I'm constantly learning and exploring new technologies. My approach combines formal education with hands-on experience, always staying curious about emerging trends in software development and AI.";
+                    return res.status(200).json({
+                        response: fallbackResponse,
+                        model: 'fallback',
+                        timestamp: new Date().toISOString(),
+                        rateLimited: true
+                    });
+                }
+                // Default response for other queries
+                else {
+                    fallbackResponse += "I'm Hridyesh Kumar, a software developer passionate about creating elegant solutions. I believe great code tells a story and approach every project with creativity and technical rigor. Feel free to explore my portfolio sections or contact me directly!";
+                }
+                
+                return res.status(200).json({
+                    response: fallbackResponse,
+                    model: 'fallback',
+                    timestamp: new Date().toISOString(),
+                    rateLimited: true
+                });
+            }
+            
             throw new Error(`Gemini API error: ${response.status}`);
         }
         const data = await response.json();

@@ -451,8 +451,8 @@ function initContactSection() {
         
             let response;
             
-            // Try Gemini API first
-            if (GEMINI_API_KEY !== 'YOUR_GEMINI_API_KEY' || USE_BACKEND) {
+            // Always use backend API (which handles fallbacks automatically)
+            try {
                 response = await callGeminiAPI(query);
                 
                 // Update conversation history
@@ -465,8 +465,8 @@ function initContactSection() {
                 if (conversationHistory.length > 10) {
                     conversationHistory = conversationHistory.slice(-10);
                 }
-            } else {
-                // Use fallback if no API key configured
+            } catch (apiError) {
+                console.log('API call failed, using fallback response');
                 response = getFallbackResponse(query);
             }
             
@@ -500,4 +500,7 @@ function initContactSection() {
 }
 
 // Initialize contact section when DOM is loaded
-document.addEventListener('DOMContentLoaded', initContactSection); 
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('Portfolio script loaded successfully');
+    initContactSection();
+}); 
