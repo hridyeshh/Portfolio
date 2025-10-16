@@ -116,7 +116,7 @@ app.use(express.static('.'));
 
 // Gemini API configuration
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
+const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent';
 
 // Portfolio context - customize this with your complete information
 const portfolioContext = `
@@ -135,18 +135,16 @@ I'm Hridyesh Kumar, a software developer with a unique perspective: I believe gr
 
 PROFESSIONAL EXPERIENCE:
 
-1. SOFTWARE DEVELOPMENT INTERN - LIMEROAD, GURUGRAM (Feb 2025 - Aug 2025)
+1. SOFTWARE DEVELOPMENT INTERN - LIMEROAD, GURUGRAM (February 2025 - August 2025)
    Key Achievements:
-   - Integrated Vmart storefront into app navigation using Kotlin MVVM, reducing user navigation time by 40%
-   - Engineered modern "AddAddress" screen with Material3 and Android13 location APIs, cutting checkout drop-offs by 25%
-   - Developed fuzzy search system with Levenshtein distance, Jaro-Winkler, and Soundex algorithms achieving 95% accuracy with <50ms response time
-   - Identified and resolved every critical defect in release backlog, ensuring 100% bug-free deployment
+   - Integrated Vmart storefront into the app's navigation drawer by embedding a secure WebView and refactoring sidebar routing (Kotlin—MVVM); identified and cleared every critical defect in the release backlog
+   - Engineered a modern "AddAddress" screen from scratch with Material3, implementing granular runtime location-permission handling (Android13 APIs) and Google FusedLocation Provider; cut checkout address-entry time and user drop-offs, while boosting Lighthouse accessibility and performance scores
+   - Developed an advanced fuzzy search system implementing Levenshtein distance, Jaro-Winkler similarity, and Soundex phonetic matching algorithms (TypeScript); achieved 95% search accuracy with <50ms response time, significantly reducing payment friction and user drop-offs during checkout
 
-2. SOFTWARE DEVELOPMENT INTERN - COLLEGE SETU, DELHI (May 2024 - July 2024)
+2. SOFTWARE DEVELOPMENT INTERN - COLLEGE SETU, NEW DELHI (May 2024 - July 2024)
    Key Achievements:
-   - Built complete Data Collection Portal using Flask and SQL, handling 10,000+ daily submissions
-   - Implemented RESTful web services with optimized database schema, improving query performance by 60%
-   - Demonstrated exceptional teamwork in fast-paced environment, contributing to 3 major feature releases
+   - Developed Data Collection Portal with database design using SQL and Flask framework, implementing RESTful web services and optimizing database schema for efficient data retrieval and storage operations
+   - Demonstrated strong teamwork, adaptability, and a commitment to delivering high-quality outcomes in a fast-paced development environment
 
 TECHNICAL EXPERTISE:
 
@@ -224,7 +222,7 @@ EDUCATION:
 Bachelor of Technology in Mathematics and Computing from Netaji Subhas University of Technology (2025)
 
 EXPERIENCE:
-Software Development Intern at Limeroad (Feb 2025 - Aug 2025) and College Setu (May 2024 - July 2024)
+Software Development Intern at Limeroad (February 2025 - August 2025) and College Setu (May 2024 - July 2024)
 
 SKILLS:
 Java, Kotlin, React, React Native, Node.js, TypeScript, SQL, JavaScript, HTML, CSS, Material Design, Android SDK, Git, GitHub, Docker
@@ -393,7 +391,7 @@ app.post('/api/chat', async (req, res) => {
                     queryLower.includes('job') || queryLower.includes('career') || queryLower.includes('background') ||
                     queryLower.includes('limeroad') || queryLower.includes('college setu') || queryLower.includes('android') ||
                     queryLower.includes('kotlin') || queryLower.includes('typescript') || queryLower.includes('flask')) {
-                    fallbackResponse += "I'm currently a Software Development Intern at Limeroad, working on Android development with Kotlin and TypeScript. I've also interned at College Setu developing data collection portals with Flask and SQL.";
+                    fallbackResponse += "I'm a Software Development Intern at Limeroad, where I work on Android development with Kotlin and implement advanced search systems with TypeScript. I previously interned at College Setu developing data collection portals with Flask and SQL.";
                 } 
                 // Skills and technology related
                 else if (queryLower.includes('skill') || queryLower.includes('technology') || queryLower.includes('language') ||
@@ -503,7 +501,7 @@ app.post('/api/chat', async (req, res) => {
         console.log(`[${new Date().toISOString()}] Query: "${query}" | Response length: ${aiResponse.length}`);
         res.json({ 
             response: aiResponse,
-            model: 'gemini-1.5-flash',
+            model: 'gemini-2.0-flash',
             timestamp: new Date().toISOString()
         });
     } catch (error) {
