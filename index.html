@@ -17,15 +17,16 @@
     <div class="cursor"></div>
 
     <!-- Navigation -->
-    <nav>
-        <ul>
-            <li><a href="#home">Home</a></li>
-            <li><a href="#experience">Experience</a></li>
-            <li><a href="#skills">Skills</a></li>
-            <li><a href="#projects">Projects</a></li>
-            <li><a href="#about">About</a></li>
-            <li><a href="#contact">Contact</a></li>
-        </ul>
+    <nav class="capsule-nav" style="font-family: Helvetica;" aria-label="Primary">
+        <div class="capsule-nav__container" role="navigation">
+            <span class="capsule-nav__pill" aria-hidden="true"></span>
+            <a class="capsule-nav__link" href="#home" data-nav>Home</a>
+            <a class="capsule-nav__link" href="#experience" data-nav>Experience</a>
+            <a class="capsule-nav__link" href="#skills" data-nav>Skills</a>
+            <a class="capsule-nav__link" href="#projects" data-nav>Projects</a>
+            <a class="capsule-nav__link" href="#about" data-nav>About</a>
+            <a class="capsule-nav__link" href="#contact" data-nav>Contact</a>
+        </div>
     </nav>
 
     <main>
@@ -156,6 +157,18 @@
             <div class="flex flex-col items-center justify-center">
                 <h2>Projects.</h2>
                 <div class="projects-grid">
+                    <a class="project-card" href="https://github.com/hridyeshh/Mailify" target="_blank" rel="noopener noreferrer">
+                        <h3>Mailify</h3>
+                        <p>A modern, time-saving email automation platform with rich text editing, bulk sending, and smart scheduling capabilities. Features Gmail API integration, OAuth 2.0 authentication, and real-time progress tracking for efficient email management.</p>
+                        <div class="tech-stack">
+                            <span class="tech-tag">JavaScript</span>
+                            <span class="tech-tag">Gmail API</span>
+                            <span class="tech-tag">OAuth 2.0</span>
+                            <span class="tech-tag">HTML5</span>
+                            <span class="tech-tag">CSS3</span>
+                            <span class="tech-tag">AWS Lambda</span>
+                        </div>
+                    </a>
                     <a class="project-card" href="https://github.com/hridyeshh/email-oasis-cleanup" target="_blank" rel="noopener noreferrer">
                         <h3>Email Oasis</h3>
                         <p>Gmail-integrated subscription management dashboard that automatically categorizes and analyzes email subscriptions, reducing inbox clutter by up to 80% with intelligent filtering and bulk management features.</p>
@@ -221,6 +234,10 @@
                             <span class="tech-tag">Bootstrap</span>
                             <span class="tech-tag">Service Worker</span>
                         </div>
+                    </a>
+                    <a class="project-card" href="https://github.com/hridyeshh?tab=repositories" target="_blank" rel="noopener noreferrer">
+                        <h3>VIEW</h3>
+                        <h3>MORE</h3>
                     </a>
                 </div>
             </div>

@@ -252,6 +252,173 @@ window.addEventListener('scroll', toggleBackToTopBtn);
 window.addEventListener('resize', toggleBackToTopBtn);
 document.addEventListener('DOMContentLoaded', toggleBackToTopBtn);
 
+// Capsule navigation sliding pill
+function initCapsuleNav() {
+    const container = document.querySelector('.capsule-nav__container');
+    const pill = document.querySelector('.capsule-nav__pill');
+    const links = Array.from(document.querySelectorAll('.capsule-nav__link'));
+    if (!container || !pill || links.length === 0) return;
+
+    // Measure link rects relative to container
+    function measure() {
+        return links.map((el) => {
+            // Use offsetLeft/offsetWidth so values are relative to the container (offsetParent)
+            return { el, left: el.offsetLeft, width: el.offsetWidth };
+        });
+    }
+
+    let metrics = measure();
+    let currentLeft = 0; // initial pill left (will be set properly)
+    let targetLeft = currentLeft;
+    let pillWidth = 0;
+    let rafId = null;
+    let activeSectionIndex = 0; // Track which section is currently active
+    let isHovering = false; // Track if user is hovering over nav
+    let userClicked = false; // Track if user clicked a nav link
+
+    // Smooth animation speed (px/ms)
+    const SPEED = 1.2; // smooth, moderate movement
+
+
+    function animate(tsPrev) {
+        function step(ts) {
+            const dt = Math.min(32, ts - tsPrev);
+            tsPrev = ts;
+            const dir = targetLeft > currentLeft ? 1 : -1;
+            const dist = Math.abs(targetLeft - currentLeft);
+            const move = Math.min(dist, SPEED * dt);
+            if (dist > 0.1) {
+                currentLeft += move * dir;
+                pill.style.transform = `translateX(${currentLeft}px) translateY(-50%)`;
+                rafId = requestAnimationFrame(step);
+            } else {
+                currentLeft = targetLeft;
+                pill.style.transform = `translateX(${currentLeft}px) translateY(-50%)`;
+                rafId = null;
+            }
+        }
+        rafId = requestAnimationFrame(step);
+    }
+
+    function moveTo(index, isHover = false) {
+        const m = metrics[index];
+        if (!m) return;
+        // Update pill width to match link width
+        pillWidth = Math.max(10, m.width);
+        pill.style.width = `${pillWidth}px`;
+        // Position pill to align with link (accounting for container padding)
+        targetLeft = m.left;
+        links.forEach(l => l.classList.remove('is-hovered', 'is-active'));
+        m.el.classList.add(isHover ? 'is-hovered' : 'is-active');
+        if (!rafId) animate(performance.now());
+    }
+
+    // Function to update active section based on scroll position
+    function updateActiveSection() {
+        if (isHovering || userClicked) return; // Don't change if user is hovering or clicked
+        
+        const sections = ['#home', '#experience', '#skills', '#projects', '#about', '#contact'];
+        const scrollPosition = window.scrollY + window.innerHeight / 2;
+        
+        for (let i = sections.length - 1; i >= 0; i--) {
+            const section = document.querySelector(sections[i]);
+            if (section && section.offsetTop <= scrollPosition) {
+                if (activeSectionIndex !== i) {
+                    activeSectionIndex = i;
+                    moveTo(i, false);
+                }
+                break;
+            }
+        }
+    }
+
+    // Hover/focus behavior (only move on hover/focus)
+    links.forEach((link, idx) => {
+        link.addEventListener('mouseenter', () => {
+            isHovering = true;
+            moveTo(idx, true);
+        });
+        link.addEventListener('focus', () => {
+            isHovering = true;
+            moveTo(idx, true);
+        });
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            userClicked = true;
+            activeSectionIndex = idx;
+            moveTo(idx, false);
+            
+            // Scroll to the target section
+            const targetId = link.getAttribute('href');
+            const targetSection = document.querySelector(targetId);
+            if (targetSection) {
+                targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+            
+            // Reset userClicked after a delay to allow scroll-based updates again
+            setTimeout(() => {
+                userClicked = false;
+            }, 1000);
+        });
+    });
+
+    // Track mouse movement within the nav container - pill follows cursor exactly
+    container.addEventListener('mousemove', (e) => {
+        if (!isHovering) return;
+        
+        const containerRect = container.getBoundingClientRect();
+        const mouseX = e.clientX - containerRect.left;
+        
+        // Find which link the mouse is closest to for width and text color
+        let closestIndex = 0;
+        let closestDistance = Infinity;
+        
+        metrics.forEach((metric, index) => {
+            const linkCenter = metric.left + metric.width / 2;
+            const distance = Math.abs(mouseX - linkCenter);
+            
+            if (distance < closestDistance) {
+                closestDistance = distance;
+                closestIndex = index;
+            }
+        });
+        
+        // Position pill exactly at cursor, but use closest link's width
+        const closestMetric = metrics[closestIndex];
+        if (closestMetric) {
+            pillWidth = Math.max(10, closestMetric.width);
+            pill.style.width = `${pillWidth}px`;
+            targetLeft = mouseX - pillWidth / 2; // Center pill on cursor
+            links.forEach(l => l.classList.remove('is-hovered'));
+            links[closestIndex].classList.add('is-hovered');
+            if (!rafId) animate(performance.now());
+        }
+    });
+
+    // When mouse leaves the entire nav container, return to active section
+    container.addEventListener('mouseleave', () => {
+        isHovering = false;
+        moveTo(activeSectionIndex, false);
+    });
+
+    // Re-measure on resize only
+    window.addEventListener('resize', () => { metrics = measure(); });
+
+    // Add scroll listener to update active section
+    window.addEventListener('scroll', updateActiveSection);
+
+    // Initialize on the first link (Home) precisely
+    setTimeout(() => {
+        metrics = measure();
+        pill.style.width = `${metrics[0].width}px`;
+        currentLeft = targetLeft = metrics[0].left;
+        pill.style.transform = `translateX(${currentLeft}px) translateY(-50%)`;
+        links.forEach(l => l.classList.remove('is-hovered', 'is-active'));
+        links[0].classList.add('is-active');
+        updateActiveSection(); // Set initial active section
+    }, 0);
+}
+
 // Contact Section with Google Gemini AI Integration
 function initContactSection() {
     const typingContent = document.querySelector('.typing-content');
@@ -503,4 +670,5 @@ function initContactSection() {
 document.addEventListener('DOMContentLoaded', () => {
     console.log('Portfolio script loaded successfully');
     initContactSection();
+    initCapsuleNav();
 }); 
