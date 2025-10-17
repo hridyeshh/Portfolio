@@ -343,7 +343,7 @@ section.visible .section-content {
     position: absolute;
     inset: 0;
     z-index: 0;
-    background: url('../assets/images/creation.png') center center/cover no-repeat;
+    background: url('../images/creation.jpg') center center/cover no-repeat;
     opacity: var(--hero-bg-opacity, 1);
     transform: scale(var(--hero-bg-scale, 1));
     transition: opacity 0.4s, transform 0.4s;
@@ -497,7 +497,7 @@ body.bg-black .btn-primary:hover {
     border-radius: 50%;
     position: relative;
     overflow: hidden;
-    background: url('../assets/images/IMG_7861\ 4.JPG') center/cover no-repeat #fff;
+    background: url('../images/IMG_7861\ 4.JPG') center/cover no-repeat #fff;
 }
 
 /* Experience Section */
