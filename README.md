@@ -4,7 +4,7 @@ A modern, interactive portfolio website featuring an AI-powered chat assistant. 
 
 ---
 
-## 🚀 Features
+## Features
 
 - **AI Chat Assistant**:  
   - Ask anything about my background, skills, or projects  
@@ -30,7 +30,7 @@ A modern, interactive portfolio website featuring an AI-powered chat assistant. 
 
 ---
 
-## 📦 Technology Stack
+## Technology Stack
 
 - **Frontend**:  
   - HTML5, CSS3 (custom, responsive, animated)  
@@ -46,7 +46,7 @@ A modern, interactive portfolio website featuring an AI-powered chat assistant. 
 
 ---
 
-## 🛠️ Installation & Setup
+## Installation & Setup
 
 ### Prerequisites
 
@@ -87,7 +87,7 @@ A modern, interactive portfolio website featuring an AI-powered chat assistant. 
 
 ---
 
-## 📖 Usage Guide
+## Usage Guide
 
 ### AI Chat
 
@@ -104,7 +104,7 @@ A modern, interactive portfolio website featuring an AI-powered chat assistant. 
 
 ---
 
-## ✨ Key Features
+## Key Features
 
 - **AI-Powered Answers**:  
   - Short summary paragraph  
@@ -118,7 +118,7 @@ A modern, interactive portfolio website featuring an AI-powered chat assistant. 
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 Portfolio/
@@ -136,7 +136,7 @@ Portfolio/
 
 ---
 
-## ⚙️ Configuration
+## Configuration
 
 ### Environment Variables
 
@@ -152,7 +152,7 @@ GEMINI_API_KEY=your_google_gemini_api_key
 
 ---
 
-## 🚀 Deployment
+## Deployment
 
 ### Local
 
@@ -173,41 +173,15 @@ vercel
 
 ---
 
-## 🧪 Testing
+## Testing
 
 - Use `/test_api.html` to test the AI chat endpoint directly
 - Try various questions in the Contact section to see formatted answers
 
 ---
 
-## 🔐 Security & Best Practices
+## Security & Best Practices
 
 - API keys are stored in `.env` (never commit this file)
 - Rate limiting on backend to prevent abuse
 - No user data is stored or tracked
-
----
-
-## 🤝 Contributing
-
-1. **Fork the repository**
-2. **Create a feature branch** (`git checkout -b feature/amazing-feature`)
-3. **Commit changes** (`git commit -m 'Add amazing feature'`)
-4. **Push to branch** (`git push origin feature/amazing-feature`)
-5. **Open Pull Request**
-
-### Development Guidelines
-
-- Use clear, semantic commit messages
-- Keep code modular and well-documented
-- Update documentation for new features
-
----
-
-## 📞 Contact & Support
-
-**Hridyesh Kumar**  
-- 📧 Email: hridyesh2309@gmail.com  
-- 🔗 [LinkedIn](https://www.linkedin.com/in/hridyeshh/)  
-- 💻 [GitHub](https://github.com/hridyeshh)  
-- 🌐 [Portfolio](https://hridyesh.vercel.app/)
