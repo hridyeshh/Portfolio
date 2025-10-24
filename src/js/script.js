@@ -1,32 +1,55 @@
-// Google Design Style Cursor
+// Optimized Smooth Cursor
 const cursor = document.querySelector('.cursor');
 
 let mouseX = 0;
 let mouseY = 0;
 let cursorX = 0;
 let cursorY = 0;
+let isAnimating = false;
 
-// Update mouse position
+// Throttled mouse position update for better performance
+let lastMouseUpdate = 0;
+const mouseUpdateThrottle = 16; // ~60fps
+
 document.addEventListener('mousemove', (e) => {
-    mouseX = e.clientX;
-    mouseY = e.clientY;
+    const now = performance.now();
+    if (now - lastMouseUpdate >= mouseUpdateThrottle) {
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+        lastMouseUpdate = now;
+        
+        // Start animation loop if not already running
+        if (!isAnimating) {
+            isAnimating = true;
+            animateCursor();
+        }
+    }
 });
 
-// Smooth cursor animation using requestAnimationFrame
+// Optimized cursor animation with better easing
 function animateCursor() {
-    // Ease the cursor position with smooth following
+    // Calculate distance to target
     const dx = mouseX - cursorX;
     const dy = mouseY - cursorY;
+    const distance = Math.sqrt(dx * dx + dy * dy);
     
-    cursorX += dx * 0.5; // Smooth following speed
-    cursorY += dy * 0.5;
+    // Use dynamic easing based on distance for smoother movement
+    const easingFactor = distance > 100 ? 0.15 : 0.08; // Faster for large movements, slower for small
     
-    // Apply transform (center the cursor on mouse position)
-    cursor.style.transform = `translate(${cursorX - 20}px, ${cursorY - 20}px)`;
+    // Apply easing
+    cursorX += dx * easingFactor;
+    cursorY += dy * easingFactor;
     
-    requestAnimationFrame(animateCursor);
+    // Use transform3d for hardware acceleration
+    cursor.style.transform = `translate3d(${cursorX - 20}px, ${cursorY - 20}px, 0)`;
+    
+    // Continue animation if we're still moving
+    if (distance > 0.5) {
+        requestAnimationFrame(animateCursor);
+    } else {
+        isAnimating = false;
+    }
 }
-animateCursor();
 
 // Hide cursor when leaving window
 document.addEventListener('mouseleave', () => {

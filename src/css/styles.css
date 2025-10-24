@@ -34,6 +34,10 @@ body.bg-black {
     mix-blend-mode: difference;
     transition: opacity 0.3s ease;
     will-change: transform;
+    /* Hardware acceleration optimizations */
+    transform: translate3d(0, 0, 0);
+    backface-visibility: hidden;
+    perspective: 1000px;
 }
 
 .cursor::before {
@@ -41,11 +45,14 @@ body.bg-black {
     position: absolute;
     top: 50%;
     left: 50%;
-    transform: translate(-50%, -50%);
+    transform: translate3d(-50%, -50%, 0);
     width: 100%;
     height: 100%;
     background: white;
     border-radius: 50%;
+    /* Performance optimizations */
+    will-change: transform;
+    backface-visibility: hidden;
 }
 
 .cursor-inner {
@@ -776,21 +783,85 @@ section#contact {
     position: relative;
     min-height: 100vh;
     overflow: hidden;
+    background: #0a0a0a;
 }
 
-#contact::before {
-    content: '';
+/* Aurora Background Effect - Original Structure with Brave Visibility */
+.aurora-background {
     position: absolute;
     top: 0;
     left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.2);
-    z-index: 1;
-    transition: background 0.5s ease;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    overflow: hidden;
+    background: #0a0a0a;
 }
 
-/* Video Background */
+.aurora-effect {
+    position: absolute;
+    inset: -10px;
+    opacity: 0.8;
+    -webkit-filter: blur(10px);
+    filter: blur(10px);
+    will-change: transform;
+    background-image: 
+        repeating-linear-gradient(100deg, #000 0%, #000 7%, transparent 10%, transparent 12%, #000 16%),
+        repeating-linear-gradient(100deg, #3b82f6 10%, #6366f1 15%, #60a5fa 20%, #c4b5fd 25%, #60a5fa 30%);
+    background-size: 300%, 200%;
+    background-position: 50% 50%, 50% 50%;
+    -webkit-animation: aurora 60s linear infinite;
+    animation: aurora 60s linear infinite;
+    -webkit-mask-image: radial-gradient(ellipse at 100% 0%, black 10%, transparent 70%);
+    mask-image: radial-gradient(ellipse at 100% 0%, black 10%, transparent 70%);
+}
+
+.aurora-effect::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: 
+        repeating-linear-gradient(100deg, #000 0%, #000 7%, transparent 10%, transparent 12%, #000 16%),
+        repeating-linear-gradient(100deg, #3b82f6 10%, #6366f1 15%, #60a5fa 20%, #c4b5fd 25%, #60a5fa 30%);
+    background-size: 200%, 100%;
+    -webkit-animation: aurora 60s linear infinite;
+    animation: aurora 60s linear infinite;
+    background-attachment: fixed;
+    mix-blend-mode: difference;
+}
+
+/* Aurora Animation - Original */
+@keyframes aurora {
+    from {
+        background-position: 50% 50%, 50% 50%;
+    }
+    to {
+        background-position: 350% 50%, 350% 50%;
+    }
+}
+
+/* Light mode Aurora - Original with Brave Visibility */
+body.bg-white .aurora-background {
+    background: #f8fafc;
+}
+
+body.bg-white .aurora-effect {
+    background-image: 
+        repeating-linear-gradient(100deg, #fff 0%, #fff 7%, transparent 10%, transparent 12%, #fff 16%),
+        repeating-linear-gradient(100deg, #3b82f6 10%, #6366f1 15%, #60a5fa 20%, #c4b5fd 25%, #60a5fa 30%);
+    -webkit-filter: blur(10px) invert(1);
+    filter: blur(10px) invert(1);
+}
+
+body.bg-white .aurora-effect::after {
+    background-image: 
+        repeating-linear-gradient(100deg, #fff 0%, #fff 7%, transparent 10%, transparent 12%, #fff 16%),
+        repeating-linear-gradient(100deg, #3b82f6 10%, #6366f1 15%, #60a5fa 20%, #c4b5fd 25%, #60a5fa 30%);
+    -webkit-filter: invert(1);
+    filter: invert(1);
+}
+
+/* Legacy video background - keeping for fallback */
 .contact-video-bg {
     position: absolute;
     top: 0;
@@ -798,19 +869,12 @@ section#contact {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    z-index: 0;
-    opacity: 1 !important;
+    z-index: -1;
+    opacity: 0;
     transition: opacity 0.5s ease;
     background: #000;
-    display: block !important;
-    visibility: visible !important;
-}
-
-/* Fallback image styling */
-.contact-video-bg img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+    display: none !important;
+    visibility: hidden !important;
 }
 
 #contact .section-content {
