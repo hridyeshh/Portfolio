@@ -1,4 +1,4 @@
-// Production-Optimized Smooth Cursor
+// Instant-Response Cursor (No Inertia)
 const cursor = document.querySelector('.cursor');
 
 let mouseX = 0;
@@ -7,6 +7,8 @@ let cursorX = 0;
 let cursorY = 0;
 let animationId = null;
 let isInitialized = false;
+let isMouseMoving = false;
+let mouseStopTimeout = null;
 
 // Initialize cursor position
 function initCursor() {
@@ -18,10 +20,25 @@ function initCursor() {
     isInitialized = true;
 }
 
-// Production-optimized mouse move handler
+// Mouse move handler with instant response
 document.addEventListener('mousemove', (e) => {
     mouseX = e.clientX;
     mouseY = e.clientY;
+    isMouseMoving = true;
+    
+    // Clear any existing timeout
+    if (mouseStopTimeout) {
+        clearTimeout(mouseStopTimeout);
+    }
+    
+    // Set timeout to detect when mouse stops moving
+    mouseStopTimeout = setTimeout(() => {
+        isMouseMoving = false;
+        // Snap cursor to exact mouse position when stopped
+        cursorX = mouseX;
+        cursorY = mouseY;
+        cursor.style.transform = `translate3d(${Math.round(cursorX - 20)}px, ${Math.round(cursorY - 20)}px, 0)`;
+    }, 16); // 16ms = ~60fps
     
     // Cancel previous animation frame
     if (animationId) {
@@ -32,34 +49,40 @@ document.addEventListener('mousemove', (e) => {
     animationId = requestAnimationFrame(animateCursor);
 }, { passive: true });
 
-// Optimized cursor animation for production
+// Cursor animation with immediate stop when mouse stops
 function animateCursor() {
+    // If mouse stopped moving, don't animate
+    if (!isMouseMoving) {
+        animationId = null;
+        return;
+    }
+    
     // Calculate distance
     const dx = mouseX - cursorX;
     const dy = mouseY - cursorY;
     const distance = Math.sqrt(dx * dx + dy * dy);
     
-    // Adaptive easing for production environments
+    // Use very aggressive easing for immediate response
     let easingFactor;
-    if (distance > 200) {
-        easingFactor = 0.25; // Very fast for large movements
-    } else if (distance > 50) {
-        easingFactor = 0.15; // Fast for medium movements
+    if (distance > 100) {
+        easingFactor = 0.4; // Very fast for large movements
+    } else if (distance > 20) {
+        easingFactor = 0.3; // Fast for medium movements
     } else {
-        easingFactor = 0.1; // Smooth for small movements
+        easingFactor = 0.25; // Still fast for small movements
     }
     
     // Apply easing
     cursorX += dx * easingFactor;
     cursorY += dy * easingFactor;
     
-    // Use transform3d with rounded values for better performance
+    // Use transform3d with rounded values
     const roundedX = Math.round(cursorX - 20);
     const roundedY = Math.round(cursorY - 20);
     cursor.style.transform = `translate3d(${roundedX}px, ${roundedY}px, 0)`;
     
-    // Continue animation if still moving
-    if (distance > 1) {
+    // Continue animation only if mouse is still moving and distance is significant
+    if (isMouseMoving && distance > 0.5) {
         animationId = requestAnimationFrame(animateCursor);
     } else {
         animationId = null;
