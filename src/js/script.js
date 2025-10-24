@@ -1,54 +1,98 @@
-// Optimized Smooth Cursor
+// Production-Optimized Smooth Cursor
 const cursor = document.querySelector('.cursor');
 
 let mouseX = 0;
 let mouseY = 0;
 let cursorX = 0;
 let cursorY = 0;
-let isAnimating = false;
+let animationId = null;
+let isInitialized = false;
 
-// Throttled mouse position update for better performance
-let lastMouseUpdate = 0;
-const mouseUpdateThrottle = 16; // ~60fps
+// Initialize cursor position
+function initCursor() {
+    if (isInitialized) return;
+    
+    cursorX = mouseX = window.innerWidth / 2;
+    cursorY = mouseY = window.innerHeight / 2;
+    cursor.style.transform = `translate3d(${cursorX - 20}px, ${cursorY - 20}px, 0)`;
+    isInitialized = true;
+}
 
+// Production-optimized mouse move handler
 document.addEventListener('mousemove', (e) => {
-    const now = performance.now();
-    if (now - lastMouseUpdate >= mouseUpdateThrottle) {
-        mouseX = e.clientX;
-        mouseY = e.clientY;
-        lastMouseUpdate = now;
-        
-        // Start animation loop if not already running
-        if (!isAnimating) {
-            isAnimating = true;
-            animateCursor();
-        }
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+    
+    // Cancel previous animation frame
+    if (animationId) {
+        cancelAnimationFrame(animationId);
     }
-});
+    
+    // Start new animation frame
+    animationId = requestAnimationFrame(animateCursor);
+}, { passive: true });
 
-// Optimized cursor animation with better easing
+// Optimized cursor animation for production
 function animateCursor() {
-    // Calculate distance to target
+    // Calculate distance
     const dx = mouseX - cursorX;
     const dy = mouseY - cursorY;
     const distance = Math.sqrt(dx * dx + dy * dy);
     
-    // Use dynamic easing based on distance for smoother movement
-    const easingFactor = distance > 100 ? 0.15 : 0.08; // Faster for large movements, slower for small
+    // Adaptive easing for production environments
+    let easingFactor;
+    if (distance > 200) {
+        easingFactor = 0.25; // Very fast for large movements
+    } else if (distance > 50) {
+        easingFactor = 0.15; // Fast for medium movements
+    } else {
+        easingFactor = 0.1; // Smooth for small movements
+    }
     
     // Apply easing
     cursorX += dx * easingFactor;
     cursorY += dy * easingFactor;
     
-    // Use transform3d for hardware acceleration
-    cursor.style.transform = `translate3d(${cursorX - 20}px, ${cursorY - 20}px, 0)`;
+    // Use transform3d with rounded values for better performance
+    const roundedX = Math.round(cursorX - 20);
+    const roundedY = Math.round(cursorY - 20);
+    cursor.style.transform = `translate3d(${roundedX}px, ${roundedY}px, 0)`;
     
-    // Continue animation if we're still moving
-    if (distance > 0.5) {
-        requestAnimationFrame(animateCursor);
+    // Continue animation if still moving
+    if (distance > 1) {
+        animationId = requestAnimationFrame(animateCursor);
     } else {
-        isAnimating = false;
+        animationId = null;
     }
+}
+
+// Initialize cursor on load
+document.addEventListener('DOMContentLoaded', initCursor);
+initCursor();
+
+// Production performance monitoring (remove in production)
+if (window.location.hostname !== 'localhost') {
+    let frameCount = 0;
+    let lastTime = performance.now();
+    
+    function monitorPerformance() {
+        frameCount++;
+        const currentTime = performance.now();
+        
+        if (currentTime - lastTime >= 1000) {
+            const fps = Math.round((frameCount * 1000) / (currentTime - lastTime));
+            if (fps < 30) {
+                console.warn(`Low FPS detected: ${fps}fps`);
+            }
+            frameCount = 0;
+            lastTime = currentTime;
+        }
+        
+        requestAnimationFrame(monitorPerformance);
+    }
+    
+    // Start monitoring after a delay
+    setTimeout(monitorPerformance, 2000);
 }
 
 // Hide cursor when leaving window

@@ -34,10 +34,13 @@ body.bg-black {
     mix-blend-mode: difference;
     transition: opacity 0.3s ease;
     will-change: transform;
-    /* Hardware acceleration optimizations */
+    /* Production-optimized hardware acceleration */
     transform: translate3d(0, 0, 0);
     backface-visibility: hidden;
     perspective: 1000px;
+    /* Additional production optimizations */
+    contain: layout style paint;
+    isolation: isolate;
 }
 
 .cursor::before {
