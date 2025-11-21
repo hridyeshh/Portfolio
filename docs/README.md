@@ -46,47 +46,6 @@ A modern, interactive portfolio website featuring an AI-powered chat assistant. 
 
 ---
 
-## Installation & Setup
-
-### Prerequisites
-
-- Node.js 18.x or higher
-- npm (comes with Node.js)
-- (Optional) Vercel CLI for deployment
-
-### Environment Configuration
-
-1. **Clone the repository**:
-   ```bash
-   git clone https://github.com/hridyeshh/Portfolio.git
-   cd Portfolio
-   ```
-
-2. **Install dependencies**:
-   ```bash
-   cd backend
-   npm install
-   ```
-
-3. **Configure environment variables**:
-   - Copy the example file and fill in your API keys:
-     ```bash
-     cp backend/env.example backend/.env
-     ```
-   - Edit `.env`:
-     ```
-     GEMINI_API_KEY=your_google_gemini_api_key
-     GITHUB_TOKEN=your_github_personal_access_token  # Optional but recommended
-     ```
-
-4. **Start the local server**:
-   ```bash
-   node local-server.js
-   ```
-   - The site will be available at [http://localhost:8000](http://localhost:8000)
-
----
-
 ## Usage Guide
 
 ### AI Chat
@@ -185,3 +144,4 @@ vercel
 - API keys are stored in `.env` (never commit this file)
 - Rate limiting on backend to prevent abuse
 - No user data is stored or tracked
+
