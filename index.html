@@ -36,9 +36,19 @@
                 <h1>Hridyesh</h1>
                 <p class="subtitle">Great knowledge often comes from the humblest of origins.
                 </p>
-                <div class="cta">
-                    <a href="#contact" class="btn btn-primary">Get In Touch</a>
-                    <a href="#projects" class="btn">View Projects</a>
+                <div class="ai-search-container">
+                    <div class="search-wrapper">
+                        <input type="text" class="ai-search-input" placeholder="Ask anything about me..." />
+                        <button class="search-button">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <path d="m21 21-4.35-4.35"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    
+                    <!-- AI Response Area -->
+                    <div class="ai-response-area"></div>
                 </div>
             </div>
         </section>
@@ -171,6 +181,19 @@
             <div class="flex flex-col items-center justify-center">
                 <h2>Projects.</h2>
                 <div class="projects-grid">
+                    <a class="project-card" href="https://paperboxd.in" target="_blank" rel="noopener noreferrer">
+                        <h3>Paperboxd</h3>
+                        <p>A modern social book tracking platform that empowers readers to discover, track, and share their literary journey. PaperBoxd transforms reading into a connected, discoverable experience—inspired by the simplicity and community spirit of Letterboxd, but built exclusively for books.
+                        </p>
+                        <div class="tech-stack">
+                            <span class="tech-tag">TypeScript</span>
+                            <span class="tech-tag">React</span>
+                            <span class="tech-tag">Next.js 15</span>
+                            <span class="tech-tag">MongoDB</span>
+                            <span class="tech-tag">Tailwind CSS</span>
+                            <span class="tech-tag">NextAuth</span>
+                        </div>
+                    </a>
                     <a class="project-card" href="https://github.com/hridyeshh/Mailify" target="_blank" rel="noopener noreferrer">
                         <h3>Mailify</h3>
                         <p>A modern, time-saving email automation platform with rich text editing, bulk sending, and smart scheduling capabilities. Features Gmail API integration, OAuth 2.0 authentication, and real-time progress tracking for efficient email management.</p>
@@ -237,18 +260,6 @@
                             <span class="tech-tag">NumPy</span>
                         </div>
                     </a>
-                    <a class="project-card" href="https://github.com/hridyeshh/SignatureApp" target="_blank" rel="noopener noreferrer">
-                        <h3>Digital Signature Pad</h3>
-                        <p>Progressive Web App for creating digital signatures with HTML5 Canvas. Features customizable colors, line thickness, local storage persistence, and PNG download functionality. Includes responsive design and offline capabilities.</p>
-                        <div class="tech-stack">
-                            <span class="tech-tag">HTML5 Canvas</span>
-                            <span class="tech-tag">JavaScript</span>
-                            <span class="tech-tag">PWA</span>
-                            <span class="tech-tag">Local Storage</span>
-                            <span class="tech-tag">Bootstrap</span>
-                            <span class="tech-tag">Service Worker</span>
-                        </div>
-                    </a>
                     <a class="project-card" href="https://github.com/hridyeshh?tab=repositories" target="_blank" rel="noopener noreferrer">
                         <h3>VIEW</h3>
                         <h3>MORE</h3>
@@ -290,22 +301,6 @@
                         <span class="typing-content"></span>
                         <span class="typing-cursor">|</span>
                     </h1>
-                    
-                    <!-- AI Search Bar (appears after typing) -->
-                    <div class="ai-search-container">
-                        <div class="search-wrapper">
-                            <input type="text" class="ai-search-input" placeholder="Ask anything about me..." />
-                            <button class="search-button">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <circle cx="11" cy="11" r="8"></circle>
-                                    <path d="m21 21-4.35-4.35"></path>
-                                </svg>
-                            </button>
-                        </div>
-                        
-                        <!-- AI Response Area -->
-                        <div class="ai-response-area"></div>
-                    </div>
                     
                     <!-- Contact Icons -->
                     <div class="contact-icons-container">

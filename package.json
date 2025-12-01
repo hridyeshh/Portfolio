@@ -2,10 +2,10 @@
   "name": "portfolio-ai",
   "version": "1.0.0",
   "description": "AI-powered portfolio with Gemini integration",
-  "main": "local-server.js",
+  "main": "src/js/local-server.js",
   "scripts": {
-    "start": "node local-server.js",
-    "dev": "node local-server.js"
+    "start": "node src/js/local-server.js",
+    "dev": "node src/js/local-server.js"
   },
   "dependencies": {
     "@vercel/analytics": "^1.5.0",
@@ -13,7 +13,8 @@
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
-    "node-fetch": "^2.6.7"
+    "node-fetch": "^2.6.7",
+    "nodemon": "^3.1.11"
   },
   "engines": {
     "node": ">=16.0.0"

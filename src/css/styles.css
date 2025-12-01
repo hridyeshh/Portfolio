@@ -920,6 +920,7 @@ body.bg-white .aurora-effect::after {
 
 /* AI Search Container */
 .ai-search-container {
+    position: relative; /* anchor response box so it doesn't push layout */
     opacity: 0;
     transform: translateY(20px);
     transition: all 0.6s ease;
@@ -963,15 +964,12 @@ body.bg-white .aurora-effect::after {
 
 .ai-search-input:focus {
     outline: none;
-    border-color: rgba(255, 255, 255, 0.6);
-    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(0, 0, 0, 0.8);
+    background: #000;
     color: #fff;
     border-radius: 20px;
     box-shadow: 
-        0 8px 32px rgba(0, 0, 0, 0.2),
-        inset 0 1px 0 rgba(255, 255, 255, 0.7),
-        inset 0 -1px 0 rgba(255, 255, 255, 0.2),
-        inset 0 0 6px 3px rgba(255, 255, 255, 0.4);
+        0 8px 24px rgba(0, 0, 0, 0.4);
 }
 
 /* Search button inside the bar, right aligned */
@@ -1008,8 +1006,13 @@ body.bg-white .aurora-effect::after {
 
 /* --- AI Response Box Customization --- */
 .ai-response-area {
+    position: absolute;              /* float over layout, don't push hero up */
+    left: 50%;
+    transform: translateX(-50%);
+    top: calc(100% + 20px);          /* just below the search bar */
     max-width: 600px;
-    margin: 20px auto 0;
+    width: 100%;
+    margin: 0 auto;
     padding: 20px;
     background: rgba(0, 0, 0, 0.7);
     backdrop-filter: blur(11px);
@@ -1032,7 +1035,7 @@ body.bg-white .aurora-effect::after {
 .ai-response-area.active {
     opacity: 1;
     max-height: 400px;
-    margin-top: 30px;
+    overflow-y: auto;                /* scroll when content exceeds visible area */
 }
 
 /* Ensure search bar and response box look good on dark bg */

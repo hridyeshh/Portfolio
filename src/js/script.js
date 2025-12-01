@@ -517,7 +517,11 @@ function initContactSection() {
     const searchInput = document.querySelector('.ai-search-input');
     const searchButton = document.querySelector('.search-button');
     const aiResponseArea = document.querySelector('.ai-response-area');
-    
+    // Ensure AI search is always visible on the home page (where it now lives)
+    if (aiSearchContainer) {
+        aiSearchContainer.classList.add('visible');
+    }
+
     // Configuration - Backend URL
     const BACKEND_URL = window.location.hostname === 'localhost' 
         ? 'http://localhost:8000/api/chat'  // Local development
