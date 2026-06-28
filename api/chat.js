@@ -188,14 +188,15 @@ module.exports = async function handler(req, res) {
             return res.status(400).json({ error: 'Query too long (max 500 characters)' });
         }
 
-        // Gemini API configuration
-        const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-        const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent';
+        // Groq API configuration
+        const GROQ_API_KEY = process.env.GEMINI_API_KEY; // stored as GEMINI_API_KEY in Vercel env
+        const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
+        const GROQ_MODEL = 'llama-3.3-70b-versatile';
 
-        if (!GEMINI_API_KEY) {
-            return res.status(500).json({ 
+        if (!GROQ_API_KEY) {
+            return res.status(500).json({
                 error: 'API key not configured',
-                fallback: true 
+                fallback: true
             });
         }
 
@@ -302,54 +303,46 @@ IMPORTANT: Answer concisely. If greeting, be brief. Use "I" — you are Hridyesh
             }
         }
 
-        // Prepare Gemini API request with optimized context
+        // Prepare Groq API request
+        const messages = [
+            { role: 'system', content: portfolioContext + (githubContext ? '\n' + githubContext : '') }
+        ];
+        if (conversationHistory.length > 0) {
+            conversationHistory.slice(-6).forEach(msg => messages.push({ role: msg.role, content: msg.content }));
+        }
+        messages.push({ role: 'user', content: query });
+
         const requestBody = {
-            contents: [{
-                parts: [{
-                    text: `${portfolioContext}${conversationContext}${githubContext}\n\nUser: ${query}\n\nAssistant:`
-                }]
-            }],
-            generationConfig: {
-                temperature: 0.7,  // Increased for more natural, varied responses
-                maxOutputTokens: 300,
-                topP: 0.8,         // Increased for more diverse responses
-                topK: 40           // Increased for better conversation flow
-            }
+            model: GROQ_MODEL,
+            messages,
+            temperature: 0.7,
+            max_tokens: 300,
+            top_p: 0.9
         };
 
-        // Call Gemini API with timeout
-        const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
+        const response = await fetch(GROQ_API_URL, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                'Authorization': `Bearer ${GROQ_API_KEY}`
             },
             body: JSON.stringify(requestBody)
         });
-        
+
         if (!response.ok) {
             const errorData = await response.json();
-            console.error('Gemini API Error:', errorData);
-            throw new Error(`Gemini API error: ${response.status}`);
+            console.error('Groq API Error:', errorData);
+            throw new Error(`Groq API error: ${response.status}`);
         }
 
         const data = await response.json();
-        let aiResponse = data.candidates[0].content.parts[0].text;
+        let aiResponse = data.choices[0].message.content.trim();
 
-        // Safety check: Filter out inappropriate responses
-        const inappropriateKeywords = ['ctc', 'salary', 'compensation', 'job title', 'position', 'apply', 'application'];
-        const responseLower = aiResponse.toLowerCase();
-        
-        if (inappropriateKeywords.some(keyword => responseLower.includes(keyword))) {
-            console.warn('Inappropriate response detected, regenerating...');
-            aiResponse = "I'd be happy to discuss my technical experience and projects. What specific aspect of my work would you like to know more about?";
-        }
-
-        // Log successful response
         console.log(`Query: "${query}" | Response length: ${aiResponse.length}`);
 
         res.status(200).json({
             response: aiResponse,
-            model: 'gemini-2.0-flash',
+            model: GROQ_MODEL,
             timestamp: new Date().toISOString(),
             cacheInfo: shouldFetchGitHub ? 'GitHub data cached for 5 minutes' : 'No GitHub data needed'
         });
