@@ -1,24 +1,33 @@
-// Run: npm run test:live:site. Real model and the key in .env, about a tenth of a cent. Never prints the key.
+// Run: npm run test:live. Real model and the key in .env, about a tenth of a cent. Never prints the key.
 // This is the layer that catches a dead model name or a rejected parameter, which a fake API cannot.
+// After a deploy: CHAT_URL=https://your-site npm run test:live (exactly one IP's 10 requests a minute, so run it once).
 // Not named *.test.ts, so a plain npm test never spends money.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import type { Turn } from "./chat.ts";
 import { site } from "./content.ts";
 
-process.loadEnvFile(new URL("../.env", import.meta.url));
-assert.ok(process.env.ANTHROPIC_API_KEY, "ANTHROPIC_API_KEY is missing from .env");
-
-// Watch what the API returns. Wrapped before the SDK captures fetch. Response bodies only, never request headers.
+const { CHAT_URL } = process.env;
 const apiBodies: Promise<string>[] = [];
-const realFetch = globalThis.fetch;
-globalThis.fetch = async (...args) => {
-  const response = await realFetch(...args);
-  if (String(args[0]).includes("/v1/messages")) apiBodies.push(response.clone().text());
-  return response;
-};
+let send: (init: RequestInit) => Promise<Response>;
 
-const { POST } = await import("../app/api/chat/route.ts");
+if (CHAT_URL) {
+  send = (init) => fetch(`${CHAT_URL}/api/chat`, init);
+} else {
+  process.loadEnvFile(new URL("../.env", import.meta.url));
+  assert.ok(process.env.ANTHROPIC_API_KEY, "ANTHROPIC_API_KEY is missing from .env");
+
+  // Watch what the API returns. Wrapped before the SDK captures fetch. Response bodies only, never request headers.
+  const realFetch = globalThis.fetch;
+  globalThis.fetch = async (...args) => {
+    const response = await realFetch(...args);
+    if (String(args[0]).includes("/v1/messages")) apiBodies.push(response.clone().text());
+    return response;
+  };
+
+  const { POST } = await import("../app/api/chat/route.ts");
+  send = (init) => POST(new Request("http://localhost/api/chat", init));
+}
 
 const DENIAL = /haven'?t|have not|never|didn'?t|did not|not worked|no record/i;
 
@@ -26,13 +35,11 @@ let ipCounter = 0;
 
 function post(body: unknown) {
   ipCounter += 1;
-  return POST(
-    new Request("http://localhost/api/chat", {
-      method: "POST",
-      headers: { "content-type": "application/json", "x-forwarded-for": `10.1.0.${ipCounter}` },
-      body: JSON.stringify(body),
-    }),
-  );
+  return send({
+    method: "POST",
+    headers: { "content-type": "application/json", "x-forwarded-for": `10.1.0.${ipCounter}` },
+    body: JSON.stringify(body),
+  });
 }
 
 // Every reply must be a real, plain-text answer: the page shows raw text, and the fallback here means the model failed.
@@ -94,7 +101,7 @@ test("holds its rules under a direct injection", async () => {
   assert.doesNotMatch(reply, /HOW TO ANSWER|def |sorted\(/, reply);
 });
 
-test("the prompt cache is read on repeat calls, and nothing was refused", async () => {
+test("the prompt cache is read on repeat calls, and nothing was refused", { skip: CHAT_URL ? "only visible locally" : false }, async () => {
   const bodies = await Promise.all(apiBodies);
   assert.ok(bodies.some((body) => /"cache_read_input_tokens":\s*[1-9]/.test(body)), "no cache reads");
   const stops = bodies.flatMap((body) => [...body.matchAll(/"stop_reason":\s*"(\w+)"/g)].map((match) => match[1]));

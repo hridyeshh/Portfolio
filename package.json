@@ -9,11 +9,7 @@
     "start": "next start",
     "lint": "oxlint app components lib scripts && { grep -rnE '#[0-9a-fA-F]{3,8}\\b|\\b[0-9]+px\\b' app components --include='*.tsx'; test $? = 1; }",
     "test": "node --test lib/*.test.ts",
-    "test:live:site": "node --test lib/chat.live.ts",
-    "dev:legacy": "node src/js/local-server.js",
-    "test:legacy": "node --test tests/chat.test.js tests/page.test.js",
-    "test:live": "node --test tests/live.test.js",
-    "test:deploy": "node --test tests/deploy.test.js"
+    "test:live": "node --test lib/chat.live.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.6.0",
