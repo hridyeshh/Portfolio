@@ -8,12 +8,31 @@ export type Status =
   | { state: "live" | "working"; label: string; text: string; links: Link[] }
   | { state: "launching" | "not-deployed" | "workshop"; label: string; text: string };
 
+// What a sheet draws in the take-apart figure. The strings are the figure's own words.
+export type Figure =
+  | { kind: "feed"; heading: string; books: string[][] }
+  | { kind: "clients"; title: string; clients: string[] }
+  | { kind: "code"; lines: string[] }
+  | { kind: "tables"; tables: { name: string; columns: string[] }[]; note: string };
+
+// One layer of a product: the decision, what it replaced, what it cost. The chat answers from these too.
+export type Layer = {
+  name: string;
+  decision: string;
+  body: string;
+  rejected: string;
+  cost: string;
+  sheet: "paper" | "kraft" | "mustard" | "green";
+  figure: Figure;
+};
+
 export type Project = {
   slug: string;
   name: string;
   line?: string;
   about: string;
   facts: string[];
+  layers?: Layer[];
   status: Status;
 };
 
@@ -50,10 +69,72 @@ export const projects: Project[] = [
       "A social network for readers: track, rate and share the books you love. It's the project I'd point to first, because it has the most layers and I built it end to end.",
     facts: [
       "Clients: Next.js web, SwiftUI iOS and Jetpack Compose Android, and every client renders the same answers.",
-      "Backend: Go, chi and sqlc, 140+ routes. PostgreSQL 16 with pgvector, 48 migrations embedded and applied on boot. Redis 7 as a soft dependency.",
-      "Zero-downtime migration from MongoDB to PostgreSQL with zero data loss. p50 search went from 200-500ms to 10-50ms, and external API calls fell 70-80%.",
+      "Backend: Go, chi and sqlc, 140+ routes. PostgreSQL 16 with pgvector, 57 migrations embedded and applied on boot. Redis 7 as a soft dependency.",
+      "Zero-downtime migration from MongoDB to PostgreSQL. Every user, book, shelf and diary entry came across. Non-integer ratings didn't, because the new schema stored whole numbers. p50 search went from 200-500ms to 10-50ms, and external API calls fell 70-80%.",
       "Closed an OAuth account-takeover path by matching on provider-stable claims.",
-      "Decoupled LLM cost from traffic with a pre-generation pipeline. The discovery engine shipped in releases R0 to R7.",
+      "Decoupled LLM cost from traffic with a pre-generation pipeline. The discovery engine was built in releases R0 to R7.",
+    ],
+    layers: [
+      {
+        name: "Surface",
+        decision: "Every recommendation has to say why.",
+        body: "A reason only appears when its own evidence holds. “Because you loved Middlemarch” needs the book to really sit near it. “maya loved this” needs maya to have given it four stars.",
+        rejected: "“Matches your taste for Fiction”, which was all the old engine could say.",
+        cost: "A row with no evidence doesn't render, so a new reader's home starts short.",
+        sheet: "paper",
+        figure: {
+          kind: "feed",
+          heading: "Picked for you",
+          books: [["maya loved this"], ["Because you", "loved Middlemarch"], ["4 readers with", "your taste", "loved this"]],
+        },
+      },
+      {
+        name: "Client",
+        decision: "Three clients, one set of answers.",
+        body: "The server writes every module title and every reason. Next.js, SwiftUI and Compose only draw them, so the answers can't drift apart.",
+        rejected: "A copy of the ranking in each app.",
+        cost: "Mobile carousels have no slot for a second line yet, so subtitles only show on the web.",
+        sheet: "kraft",
+        figure: { kind: "clients", title: "Picked for you", clients: ["Next.js", "SwiftUI", "Compose"] },
+      },
+      {
+        name: "API",
+        decision: "Search reads the query before it searches.",
+        body: "“Like Sally Rooney, under 300 pages, no romance” is three instructions. A deterministic parser splits them, and a Redis session lets “shorter” refine the last ask instead of starting over.",
+        rejected: "Embedding the whole string, which lands near all three and exactly on none. And a model call on every debounced keystroke.",
+        cost: "It only knows a closed set of patterns. “Something that will destroy me” has to go to the model.",
+        sheet: "mustard",
+        figure: {
+          kind: "code",
+          lines: [
+            "POST /api/v1/search",
+            '"like Sally Rooney, under 300',
+            ' pages, no romance"',
+            "",
+            "intent        similarity",
+            "similar_to    Sally Rooney",
+            "max_pages     300",
+            "exclude_axes  romance_centrality",
+          ],
+        },
+      },
+      {
+        name: "Data",
+        decision: "Left MongoDB for PostgreSQL, with no downtime.",
+        body: "A dry run first, ObjectIds mapped to UUIDs, Mongo kept as the backup. Book search went from 200-500ms to 10-50ms, and foreign keys caught follows pointing at deleted users.",
+        rejected: "Staying on MongoDB and going out to Google Books on every search.",
+        cost: "The new schema stored whole-number ratings, so every 3.5 stayed behind. I should have settled that before migrating.",
+        sheet: "green",
+        figure: {
+          kind: "tables",
+          tables: [
+            { name: "users", columns: ["id uuid", "mongo_id varchar(24)"] },
+            { name: "books", columns: ["id uuid", "embedding vector(1024)"] },
+            { name: "bookshelf", columns: ["book_id uuid", "rating integer"] },
+          ],
+          note: "3.5 didn't fit",
+        },
+      },
     ],
     status: {
       state: "live",
@@ -90,7 +171,7 @@ export const projects: Project[] = [
     facts: [],
     status: {
       state: "launching",
-      label: "Launching November 2026",
+      label: "Launching November",
       text: "launching November 2026, so there's no public link yet.",
     },
   },
@@ -178,6 +259,61 @@ export const about = {
 };
 
 export const work = { title: "Work" };
+
+export const masthead = {
+  note: "go on, lift it",
+  art: "Two painted hands lift a blank sheet off a stack of kraft, mustard, terracotta and green sheets.",
+};
+
+export const chapters = {
+  paperboxd: {
+    note: "web, iOS, Android, Go",
+    apps: "The iOS and Android apps are built and reach the stores by December 2026.",
+    art: "Two hands offer a kraft box packed with hardback books.",
+    loop: {
+      src: "/loops/paperboxd.webm",
+      poster: "/loops/paperboxd.jpg",
+      label: "A recording of paperboxd.in scrolling through its own chapters.",
+    },
+  },
+  stickynotes: {
+    note: "no CORS anywhere",
+    mark: "the parts that matter",
+    art: "A kraft notebook with a star sticker, passed between two hands.",
+  },
+  thelocalcode: {
+    note: "two people",
+    art: "A beige classic computer.",
+    hand: "A gloved hand brings a floppy disk labeled thelocalcode to the computer.",
+    loop: {
+      src: "/loops/thelocalcode.webm",
+      poster: "/loops/thelocalcode.jpg",
+      label: "A recording of the thelocalcode site, playing on the computer's screen.",
+    },
+  },
+};
+
+export const loop = { pause: "Pause", play: "Play" };
+
+export const apart = {
+  title: "Take it apart.",
+  intro: "Paperboxd, one layer at a time. Each is a decision, with what it replaced and what it cost.",
+  rejected: "Rejected",
+  cost: "It cost",
+  figure: "A stack of sheets coming apart, with a signal running between them. The sheets are",
+};
+
+export const bench = {
+  title: "Making now, and also built",
+  art: {
+    puzzlecafe: "A hand holds up a small sea-green toy roadster.",
+    desky: "A dark desk display with two speakers and three lit screens: a pixel pet, a sunrise and a 25-minute timer.",
+    butterfly: "A butterfly hair clip with lavender wings and a small circuit board down its body.",
+    keychain: "A yellow keychain whose little screen shows a pixel cat in a meadow.",
+  },
+};
+
+export const career = { title: "Experience", skills: "What I reach for" };
 
 export const ask = {
   title: "Ask",

@@ -8,15 +8,24 @@
   --pencil-on-dark: oklch(0.74 0.15 32);
   --pencil-on-light: oklch(0.5 0.18 29);
 
+  /* The painted stack in hero-1, sampled, so the sheets in the take-apart figure are the same sheets. */
+  --sheet-white: rgb(253 253 249);
+  --sheet-ink: oklch(0.24 0.05 258);
+  --stack-kraft: rgb(185 133 77);
+  --stack-mustard: rgb(233 165 40);
+  --stack-terracotta: rgb(206 78 50);
+  --stack-green: rgb(34 94 60);
+
   /* Project chapters. Each keeps its own palette. */
   --pbx-ground: #f2ede1;
   --pbx-ink: #151513;
   --pbx-muted: #6a6456;
   --pbx-accent-text: #c0271c; /* #d23b26 fails 4.5:1, so it is for large type and art only */
   --pbx-accent-art: #d23b26;
-  --sticky-ground: #f3f2f2;
+  --sticky-ground: #f2f2f2; /* sampled from sticky-hands.jpg, so the painting has no visible edge */
   --sticky-ink: #201f1d;
   --sticky-amber: #b68235; /* art and large shapes only */
+  --sticky-marker: rgb(240 196 25 / 0.38); /* the extension's own yellow highlight */
   --tlc-ground: #7f78c5;
   --tlc-ink: #151513; /* red fails on this ground at every lightness, so margin notes use ink */
   --tlc-finale-ground: #194d15;
@@ -44,8 +53,10 @@
   --step-body: clamp(1.0625rem, 1.03rem + 0.14vw, 1.1875rem);
   --step-note: clamp(1.375rem, 1.3rem + 0.3vw, 1.625rem);
   --step-lead: clamp(1.625rem, 1.4rem + 1vw, 2.5rem);
+  --step-decision: clamp(1.875rem, 1.5rem + 1.7vw, 3.25rem);
   --step-section: clamp(2.75rem, 2rem + 3.3vw, 5rem);
   --step-statement: clamp(3rem, 1.7rem + 5.5vw, 6.5rem);
+  --step-chapter: clamp(3.25rem, 1.5rem + 9.5vw, 11rem);
 
   /* Fitted to the measured width of each string in the display face, so they fill their container at every size. */
   --fit-wordmark: 0.2895;
@@ -60,7 +71,10 @@
   --gap-tight: 0.6em;
 
   --radius-pill: 99em;
+  --radius-tile: clamp(12px, 1.2vw, 20px);
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-move: cubic-bezier(0.65, 0, 0.35, 1);
 }
 
 * {
@@ -93,7 +107,9 @@ h2,
 h3,
 p,
 ul,
-ol {
+ol,
+dl,
+dd {
   margin: 0;
 }
 
@@ -155,6 +171,45 @@ input {
   top: var(--nav-top);
 }
 
+/* Each project keeps its palette wherever it appears: tile, chapter or band. */
+.tone {
+  background: var(--ground);
+  color: var(--ink);
+}
+
+.tone ::selection {
+  background: var(--ink);
+  color: var(--ground);
+}
+
+.tone-paperboxd {
+  --ground: var(--pbx-ground);
+  --ink: var(--pbx-ink);
+  --ink-soft: var(--pbx-muted);
+  --pencil: var(--pbx-accent-text);
+}
+
+.tone-stickynotes {
+  --ground: var(--sticky-ground);
+  --ink: var(--sticky-ink);
+  --ink-soft: color-mix(in oklab, var(--sticky-ink) 78%, var(--sticky-ground));
+  --pencil: var(--pencil-on-light);
+}
+
+.tone-thelocalcode {
+  --ground: var(--tlc-ground);
+  --ink: var(--tlc-ink);
+  --ink-soft: var(--tlc-ink);
+  --pencil: var(--tlc-ink);
+}
+
+.tone-puzzlecafe {
+  --ground: var(--puzzle-ground);
+  --ink: var(--puzzle-ink);
+  --ink-soft: var(--puzzle-ink);
+  --pencil: var(--puzzle-ink);
+}
+
 /* Pill nav. The cyanotype ring disappears on the blue ground and gives the paper pill an edge on light chapters. */
 .nav {
   position: fixed;
@@ -207,23 +262,345 @@ input {
   white-space: nowrap;
 }
 
+/* Masthead. Sized in --u, a design pixel of the comp at each width, so the composition holds at every size. */
 .masthead {
+  container-type: inline-size;
+  overflow-x: clip;
   padding-top: var(--masthead-top);
 }
 
+.masthead .wordmark span {
+  padding-bottom: 0; /* here the painted sheet covers the y's tail, on purpose */
+}
+
+.stage {
+  --u: calc(100cqw / 390);
+  position: relative;
+  height: calc(790 * var(--u));
+  margin-top: calc(8 * var(--u));
+}
+
+.hero-art {
+  position: absolute;
+  top: 0;
+  left: calc(-96 * var(--u));
+  width: calc(600 * var(--u));
+}
+
+.hero-art > img {
+  width: 100%;
+}
+
+/* The ground is the painted sheet's own white, so the text stays readable before the art arrives. */
+.hero-sheet {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: calc(6 * var(--u));
+  padding: calc(10 * var(--u)) calc(30 * var(--u));
+  background: var(--sheet-white);
+  color: var(--sheet-ink);
+}
+
 .statement {
-  margin: var(--gap-group) var(--gutter) 0;
-  max-width: 14ch;
-  font: 500 var(--step-statement) / 1.02 var(--display);
+  font: 500 calc(33 * var(--u)) / 0.98 var(--display);
   letter-spacing: -0.012em;
   text-wrap: balance;
 }
 
 .support {
-  margin: var(--gap-tight) var(--gutter) 0;
-  color: var(--ink-soft);
-  font-size: var(--step-lead);
+  font-size: max(0.75rem, calc(12.5 * var(--u)));
   line-height: 1.3;
+}
+
+.hero-sheet .hero-note {
+  align-self: flex-start;
+  color: var(--pencil-on-light);
+  font-size: calc(21 * var(--u));
+  text-decoration: none;
+}
+
+@media (hover: hover) {
+  .hero-note:hover {
+    text-decoration: underline;
+  }
+}
+
+.tile {
+  --dx: 0;
+  position: absolute;
+  top: calc(var(--y) * var(--u));
+  left: calc(var(--gutter) + var(--dx) * var(--u));
+  width: calc(var(--w) * var(--u));
+  height: calc(var(--h) * var(--u));
+  border-radius: var(--radius-tile);
+}
+
+.tile-paperboxd {
+  --y: 346;
+  --w: 170;
+  --h: 226;
+}
+
+.tile-puzzlecafe {
+  --dx: 180;
+  --y: 330;
+  --w: 178;
+  --h: 232;
+}
+
+.tile-stickynotes {
+  --y: 582;
+  --w: 170;
+  --h: 200;
+}
+
+.tile-thelocalcode {
+  --dx: 180;
+  --y: 572;
+  --w: 178;
+  --h: 210;
+}
+
+.tile a {
+  position: absolute;
+  inset: 0;
+  display: block;
+  overflow: hidden;
+  border-radius: inherit;
+  text-decoration: none;
+}
+
+.tile a:focus-visible {
+  outline-color: var(--paper); /* it sits on the blue, whatever the tile's own pencil is */
+}
+
+.tile-name {
+  position: absolute;
+  z-index: 1;
+  top: calc(8 * var(--u));
+  left: calc(11 * var(--u));
+  font: 500 calc(26 * var(--u)) / 1 var(--display);
+}
+
+.tile .chip {
+  position: absolute;
+  z-index: 1;
+  bottom: calc(11 * var(--u));
+  left: calc(11 * var(--u));
+  font-size: max(0.625rem, calc(9 * var(--u)));
+  letter-spacing: 0.02em;
+}
+
+.tile img {
+  position: absolute;
+  max-width: none;
+}
+
+.tile-paperboxd img {
+  top: 18%;
+  left: 8%;
+  width: 84%;
+}
+
+.tile-puzzlecafe img {
+  top: 18%;
+  left: 8%;
+  width: 92%;
+  height: 82%;
+  object-fit: contain;
+  object-position: 100% 100%;
+}
+
+.tile-stickynotes img {
+  top: 26%;
+  left: -30%;
+  width: 160%;
+}
+
+.tile-thelocalcode img {
+  top: 26%;
+  left: 22%;
+  width: 56%;
+}
+
+@media (min-width: 48rem) {
+  .stage {
+    --u: calc(100cqw / 768);
+    height: calc(940 * var(--u));
+    margin-top: calc(-4 * var(--u));
+  }
+
+  /* The phone's scale, so both sleeves leave the frame instead of ending in a cut edge. */
+  .hero-art {
+    left: calc(-189 * var(--u));
+    width: calc(1183 * var(--u));
+  }
+
+  .hero-sheet {
+    gap: calc(12 * var(--u));
+    padding: calc(24 * var(--u)) calc(48 * var(--u));
+  }
+
+  .statement {
+    font-size: calc(66 * var(--u));
+  }
+
+  .support {
+    font-size: calc(19 * var(--u));
+  }
+
+  .hero-sheet .hero-note {
+    font-size: calc(32 * var(--u));
+  }
+
+  .tile-paperboxd {
+    --y: 664;
+    --w: 176;
+    --h: 250;
+  }
+
+  .tile-puzzlecafe {
+    --dx: 184;
+    --y: 690;
+    --w: 176;
+    --h: 232;
+  }
+
+  .tile-stickynotes {
+    --dx: 368;
+    --y: 672;
+    --w: 176;
+    --h: 250;
+  }
+
+  .tile-thelocalcode {
+    --dx: 552;
+    --y: 696;
+    --w: 176;
+    --h: 236;
+  }
+
+  .tile-name {
+    font-size: calc(25 * var(--u));
+  }
+}
+
+@media (min-width: 64rem) {
+  .stage {
+    --u: calc(100cqw / 1440);
+    height: calc(588 * var(--u)); /* the art's own height, so its sleeves run straight into the next chapter */
+    margin-top: calc(-10 * var(--u));
+  }
+
+  .hero-art {
+    left: calc(450 * var(--u)); /* the sleeve's cut edge hides behind the tiles */
+    width: calc(990 * var(--u));
+  }
+
+  .hero-sheet {
+    gap: calc(12 * var(--u));
+    padding: calc(26 * var(--u)) calc(44 * var(--u));
+  }
+
+  .statement {
+    font-size: calc(70 * var(--u));
+  }
+
+  .support {
+    font-size: max(0.875rem, calc(18 * var(--u)));
+  }
+
+  /* On the blue beside the sheet, in the red made for it. */
+  .hero-sheet .hero-note {
+    position: absolute;
+    top: calc(33 * var(--u));
+    left: calc(-203 * var(--u));
+    width: calc(210 * var(--u));
+    color: var(--pencil-on-dark);
+    font-size: calc(36 * var(--u));
+    rotate: -5deg;
+  }
+
+  .tile-paperboxd {
+    --y: 28;
+    --w: 206;
+    --h: 252;
+  }
+
+  .tile-puzzlecafe {
+    --dx: 218;
+    --y: 62;
+    --w: 214;
+    --h: 232;
+  }
+
+  .tile-stickynotes {
+    --dx: 0;
+    --y: 292;
+    --w: 206;
+    --h: 270;
+  }
+
+  .tile-thelocalcode {
+    --dx: 218;
+    --y: 306;
+    --w: 214;
+    --h: 270;
+  }
+
+  .tile-name {
+    top: calc(8.4 * var(--u));
+    left: calc(12 * var(--u));
+    font-size: calc(30 * var(--u));
+  }
+
+  .tile .chip {
+    bottom: calc(12 * var(--u));
+    left: calc(12 * var(--u));
+    font-size: max(0.625rem, calc(10 * var(--u)));
+  }
+
+  .tile-paperboxd img {
+    top: auto;
+    bottom: 6%;
+  }
+
+  .tile-stickynotes img {
+    left: 0;
+    width: 100%;
+  }
+
+  .tile-thelocalcode img {
+    top: 24%;
+    left: 20%;
+    width: 60%;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .tile {
+    animation: settle 0.8s var(--ease-expo) both;
+    animation-delay: calc(var(--i) * 70ms);
+  }
+
+  .tile img {
+    transition: translate 0.5s var(--ease-out);
+  }
+
+  @media (hover: hover) {
+    .tile a:hover img {
+      translate: 0 -2%;
+    }
+  }
+}
+
+@keyframes settle {
+  from {
+    opacity: 0;
+    translate: 0 1.25rem;
+  }
 }
 
 .section {
@@ -234,12 +611,6 @@ input {
   margin-bottom: var(--gap-group);
   font: 500 var(--step-section) / 1 var(--display);
   letter-spacing: -0.012em;
-}
-
-.prose {
-  display: grid;
-  gap: 1em;
-  max-width: 62ch;
 }
 
 /* Tag chip: the one place small caps with tracking are allowed. */
@@ -263,46 +634,965 @@ input {
   rotate: -3deg;
 }
 
-/* Work index. Chapters and tiles replace the top of this on the finished home page. */
-.work > li {
-  display: grid;
-  gap: var(--gap-tight);
-  padding-block: var(--gap-group);
-  border-top: 1px solid var(--rule);
-}
-
-.work h3 {
-  font: 500 var(--step-lead) / 1.05 var(--display);
-}
-
-.work-copy {
-  display: grid;
-  gap: 0.35em;
-  max-width: 62ch;
-}
-
-.work-line {
-  font: 500 var(--step-lead) / 1.1 var(--display);
-  text-wrap: balance;
-}
-
-.work-status {
+.status {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  align-self: start;
   gap: 0.5em 0.9em;
   font-size: var(--step-small);
 }
 
+/* Chapters. One idea per screen, and no two composed alike. */
+.chapter {
+  overflow: clip;
+}
+
+.chapter-inner {
+  position: relative;
+  padding: var(--gap-section) var(--gutter) 0;
+}
+
+.chapter-name {
+  font: 500 var(--step-lead) / 1.05 var(--display);
+}
+
+.chapter-line {
+  margin-top: 0.14em;
+  font: 500 var(--step-chapter) / 0.96 var(--display);
+  letter-spacing: -0.018em;
+  text-wrap: balance;
+}
+
+.chapter-note {
+  display: block;
+  width: fit-content;
+  margin-top: 0.5em;
+}
+
+.chapter-about {
+  max-width: 46ch;
+  color: var(--ink-soft);
+}
+
+.chapter-about + .status {
+  margin-top: 1.1em;
+}
+
+.loop {
+  position: relative;
+  overflow: hidden;
+}
+
+.loop video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.loop-toggle {
+  position: absolute;
+  right: 0.75em;
+  bottom: 0.75em;
+  padding: 0.5em 0.85em;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--paper);
+  color: var(--cyanotype);
+  font: 600 var(--step-chip) / 1 var(--body);
+  cursor: pointer;
+}
+
+.loop-toggle::before {
+  content: "";
+  position: absolute;
+  inset: -0.75em; /* a small pill with a thumb-sized target */
+}
+
+.loop-toggle:focus-visible {
+  outline-color: var(--cyanotype);
+}
+
+/* Paperboxd: the recording behind, the box held out in front of it. */
+.pbx-head {
+  position: relative;
+}
+
+.pbx .chapter-line {
+  line-height: 1.04; /* the y of "diary" runs into the d of "database" any tighter */
+}
+
+.pbx-loop .loop-toggle {
+  right: auto;
+  left: 0.75em; /* clear of the box held in front of it */
+}
+
+.pbx-copy {
+  margin-top: var(--gap-group);
+}
+
+.pbx-media {
+  position: relative;
+  margin-top: var(--gap-group);
+}
+
+.pbx-loop {
+  aspect-ratio: 16 / 10;
+  border-radius: var(--radius-tile);
+}
+
+.pbx-box {
+  position: relative;
+  width: 72%;
+  margin: -16% 0 0 auto;
+}
+
+@media (min-width: 60rem) {
+  .pbx {
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 8fr);
+    grid-template-areas:
+      "name name"
+      "head head"
+      "copy media";
+    column-gap: var(--gap-group);
+  }
+
+  .pbx .chapter-name {
+    grid-area: name;
+  }
+
+  .pbx-head {
+    grid-area: head;
+  }
+
+  .pbx-copy {
+    grid-area: copy;
+  }
+
+  .pbx-media {
+    grid-area: media;
+  }
+
+  .pbx-head .chapter-note {
+    position: absolute;
+    top: calc(var(--step-chapter) * 0.3);
+    left: calc(var(--step-chapter) * 3.1);
+    margin: 0;
+    font-size: calc(var(--step-note) * 1.5);
+  }
+
+  .pbx-box {
+    width: 56%;
+    margin-top: -24%;
+  }
+}
+
+/* stickynotes: centered on the notebook, with the line highlighted the way the extension does it. */
+.sticky {
+  text-align: center;
+}
+
+.sticky .chapter-line {
+  font-size: calc(var(--step-chapter) * 0.78);
+}
+
+.sticky .chapter-note {
+  margin-inline: auto;
+}
+
+.marker {
+  padding-inline: 0.06em;
+  border-radius: 0.08em 0.22em 0.12em 0.18em;
+  background: linear-gradient(var(--sticky-marker), var(--sticky-marker)) no-repeat 0 72% / 100% 62%;
+  color: inherit;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+
+.sticky-art {
+  width: 170%;
+  max-width: none;
+  margin: var(--gap-group) 0 0 -35%;
+}
+
+.sticky-foot {
+  padding-block: var(--gap-group);
+  text-align: left;
+}
+
 @media (min-width: 48rem) {
-  .work > li {
-    grid-template-columns: minmax(0, 3fr) minmax(0, 6fr) minmax(0, 3fr);
+  .sticky-art {
+    width: calc(100% + 2 * var(--gutter));
+    margin: 0 0 0 calc(-1 * var(--gutter));
+  }
+
+  .sticky-foot {
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--gap-group);
+    margin-top: -9%;
+  }
+
+  .sticky-foot .chapter-about {
+    max-width: 34ch;
+  }
+
+  .sticky .chapter-note {
+    position: absolute;
+    top: calc(var(--gap-section) + var(--step-chapter) * 2.05);
+    right: 9%;
+    margin: 0;
+    font-size: calc(var(--step-note) * 1.4);
+    rotate: 4deg;
+  }
+}
+
+/* thelocalcode: the site runs on the Mac, and a hand brings it the disk. */
+.tlc-copy .chapter-line {
+  font-size: calc(var(--step-chapter) * 0.86);
+}
+
+.tlc-copy .chapter-about {
+  margin-top: var(--gap-group);
+}
+
+.tlc-media {
+  margin-top: var(--gap-group);
+  padding-bottom: var(--gap-section);
+}
+
+.mac {
+  position: relative;
+  width: 66%;
+  margin-left: 4%;
+}
+
+.mac > img:first-child {
+  width: 100%;
+}
+
+/* The blank screen in mac.webp, from thelocalcode's own art data. */
+.mac-screen {
+  position: absolute;
+  top: 11.82%;
+  left: 12.39%;
+  width: 75.49%;
+  height: 44.86%;
+  border-radius: 3.5% / 4.5%;
+  background: var(--sheet-white);
+}
+
+.mac-hand {
+  position: absolute;
+  top: 56.7%;
+  left: 78%;
+  width: 116%;
+  max-width: none;
+}
+
+@media (min-width: 60rem) {
+  .tlc {
+    display: grid;
+    grid-template-columns: minmax(0, 7fr) minmax(0, 6fr);
+    align-items: end;
+    column-gap: var(--gap-group);
+    padding-bottom: var(--gap-section);
+  }
+
+  .tlc-media {
+    margin: 0;
+    padding: 0;
+  }
+
+  .mac {
+    width: 72%;
+    margin-left: 0;
+  }
+
+  .tlc-copy .chapter-note {
+    font-size: calc(var(--step-note) * 1.4);
+  }
+}
+
+/* Take it apart. These defaults are the still version: every layer showing, every decision listed. */
+.apart {
+  --sheet-w: min(76vw, 34rem);
+  --gap-open: calc(var(--sheet-w) * 0.3);
+  --gap-ratio: 0.07;
+  padding-top: var(--gap-section);
+}
+
+.apart-stage {
+  display: grid;
+  gap: var(--gap-group);
+  padding-inline: var(--gutter);
+}
+
+.apart-figure {
+  display: grid;
+  place-items: center;
+  height: calc(var(--sheet-w) * 1.46);
+}
+
+.apart-iso {
+  position: relative;
+  width: var(--sheet-w);
+  aspect-ratio: 8 / 5;
+  transform: rotateX(56deg) rotateZ(-32deg);
+  transform-style: preserve-3d;
+}
+
+.apart-sheet {
+  position: absolute;
+  inset: 0;
+  transform: rotateZ(0deg) rotateX(0deg) translate3d(0, 0, calc(var(--depth) * var(--gap-open))) scale(1);
+}
+
+.apart-sheet svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Stands on edge through every sheet's via, so the data visibly passes through the layers. */
+.apart-trace {
+  --span: calc((var(--layers) - 1) * var(--gap-open));
+  position: absolute;
+  top: 89%;
+  left: 93.125%;
+  width: 6px;
+  height: var(--span);
+  margin-left: -3px;
+  transform: translateZ(calc(var(--span) * -0.5)) rotateX(90deg) scaleY(1);
+  transform-origin: 50% 0;
+}
+
+.apart-trace svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.signal {
+  stroke: var(--stack-terracotta);
+  stroke-width: 4;
+  stroke-dasharray: 6 14;
+  vector-effect: non-scaling-stroke;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .signal {
+    animation: signal 0.9s linear infinite;
+  }
+}
+
+@keyframes signal {
+  to {
+    stroke-dashoffset: -20;
+  }
+}
+
+.apart-intro h2 {
+  font: 500 var(--step-statement) / 1 var(--display);
+  letter-spacing: -0.012em;
+}
+
+.apart-intro p {
+  margin-top: 0.6em;
+  max-width: 34ch;
+  color: var(--ink-soft);
+  font-size: var(--step-lead);
+  line-height: 1.25;
+}
+
+.apart-decisions {
+  display: grid;
+  gap: var(--gap-section);
+}
+
+.apart-decisions .chip {
+  background: var(--sheet);
+  color: var(--sheet-text);
+}
+
+.apart-decisions h3 {
+  margin-top: 0.5em;
+  font: 500 var(--step-decision) / 1.02 var(--display);
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+
+.apart-decisions p {
+  margin-top: 0.7em;
+  max-width: 54ch;
+}
+
+.apart-decisions dl {
+  display: grid;
+  gap: 0.6em;
+  margin-top: 0.9em;
+  max-width: 54ch;
+}
+
+.apart-decisions dt {
+  color: var(--pencil);
+  font: 600 var(--step-note) / 1 var(--hand);
+}
+
+.apart-decisions dd {
+  color: var(--ink-soft);
+}
+
+@media (min-width: 60rem) {
+  .apart {
+    --sheet-w: min(36vw, 30rem);
+  }
+
+  .apart-stage {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 4fr);
+    align-items: start;
+    row-gap: var(--gap-section);
+  }
+
+  .apart-figure {
+    position: sticky;
+    top: calc(50svh - var(--sheet-w) * 0.73);
+    grid-area: 1 / 1 / span 2;
+  }
+
+  .apart-intro {
+    grid-area: 1 / 2;
+  }
+
+  .apart-decisions {
+    grid-area: 2 / 2;
+  }
+}
+
+.sheet-paper {
+  --sheet: var(--sheet-white);
+  --sheet-text: var(--sheet-ink);
+  --sheet-note: var(--pencil-on-light);
+}
+
+.sheet-kraft {
+  --sheet: var(--stack-kraft);
+  --sheet-text: var(--pbx-ink);
+  --sheet-note: var(--pbx-ink);
+  --frame-fill: var(--sheet-white);
+}
+
+.sheet-mustard {
+  --sheet: var(--stack-mustard);
+  --sheet-text: var(--pbx-ink);
+  --sheet-note: var(--pbx-ink);
+}
+
+.sheet-green {
+  --sheet: var(--stack-green);
+  --sheet-text: var(--paper);
+  --sheet-note: var(--tlc-finale-note);
+}
+
+.fig-ground {
+  fill: var(--sheet);
+}
+
+.apart-sheet text {
+  fill: var(--sheet-text);
+}
+
+.fig-display {
+  font: 500 40px var(--display);
+}
+
+.fig-small {
+  font: 500 15px var(--display);
+}
+
+.fig-body {
+  font: 400 19px var(--body);
+}
+
+.fig-code {
+  font: 400 23px var(--figure);
+  white-space: pre;
+}
+
+.fig-table {
+  font: 500 30px var(--display);
+}
+
+.fig-column {
+  font: 400 17px var(--figure);
+}
+
+.fig-marked {
+  text-decoration: underline 2px var(--sheet-note);
+  text-underline-offset: 4px;
+}
+
+.apart-sheet .fig-note {
+  fill: var(--sheet-note);
+  font: 600 36px var(--hand);
+}
+
+.fig-name {
+  font: 600 20px var(--body);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.fig-via,
+.fig-cover-0 {
+  fill: var(--stack-terracotta);
+}
+
+.fig-cover-1 {
+  fill: var(--stack-green);
+}
+
+.fig-cover-2 {
+  fill: var(--stack-mustard);
+}
+
+.fig-spine {
+  fill: color-mix(in oklab, var(--pbx-ink) 28%, transparent);
+}
+
+.fig-frame {
+  fill: var(--frame-fill, none);
+  stroke: var(--sheet-text);
+  stroke-width: 2;
+}
+
+/* The moving version, only where it can run: scroll timelines, motion welcome, and room to pin.
+   Phones get the still: their visible height shifts with the browser's bars, and pinned copy that overflows is lost.
+   scripts/check.mjs fails if a decision stops fitting the stage at these sizes, so copy can't quietly outgrow it. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) and (min-width: 60rem) and (min-height: 44rem),
+    (prefers-reduced-motion: no-preference) and (min-width: 48rem) and (min-height: 56rem) {
+    .apart {
+      --sheet-w: min(60vw, 40svh);
+      --lift-z: calc(var(--sheet-w) * 1.4);
+      --lift-scale: 1.48;
+      margin-top: var(--gap-section);
+      padding-top: 0;
+    }
+
+    .apart-track {
+      height: calc(100svh + var(--layers) * 80svh);
+      view-timeline: --apart block;
+    }
+
+    .apart-stage {
+      position: sticky;
+      top: 0;
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-rows: minmax(0, 44svh) minmax(0, 1fr);
+      height: 100svh;
+      gap: 0;
+      overflow: clip;
+      padding-top: calc(var(--masthead-top) + 0.5rem);
+    }
+
+    .apart-figure {
+      position: static;
+      grid-area: 1 / 1;
+      align-self: center;
+      height: 100%;
+    }
+
+    .apart-intro {
+      grid-area: 2 / 1;
+      align-self: center;
+      animation: apart-intro linear both;
+      animation-timeline: --apart;
+      animation-range: contain 6% contain var(--opens-by);
+    }
+
+    .apart-decisions {
+      grid-area: 2 / 1;
+      gap: 0;
+      min-height: 0;
+    }
+
+    .apart-decisions li {
+      grid-area: 1 / 1;
+      align-self: center;
+      animation: apart-copy linear both;
+      animation-timeline: --apart;
+      animation-range: contain var(--from) contain var(--to);
+    }
+
+    .apart-decisions li:last-child {
+      animation-name: apart-copy-last;
+    }
+
+    .apart-sheet {
+      animation-name: apart-open, apart-lift;
+      animation-fill-mode: both, none;
+      animation-timing-function: linear;
+      animation-timeline: --apart, --apart;
+      animation-range:
+        contain 0% contain var(--opens-by),
+        contain var(--from) contain var(--to);
+    }
+
+    .apart-sheet:last-of-type {
+      animation-name: apart-open, apart-lift-last;
+      animation-fill-mode: both, both;
+    }
+
+    .apart-trace {
+      animation: apart-trace linear both;
+      animation-timeline: --apart;
+      animation-range: contain 0% contain var(--opens-by);
+    }
+
+    @media (min-width: 60rem) {
+      .apart {
+        --sheet-w: min(36vw, 58svh);
+        --lift-scale: 1.25;
+      }
+
+      .apart-stage {
+        grid-template-rows: minmax(0, 1fr);
+        grid-template-columns: minmax(0, 5fr) minmax(0, 4fr);
+        align-items: center;
+        padding-top: 0;
+      }
+
+      .apart-intro,
+      .apart-decisions {
+        grid-area: 1 / 2;
+      }
+    }
+  }
+}
+
+/* Each keyframe names the whole list, so the browser can move every part of it smoothly.
+   rotateZ(32deg) rotateX(-56deg) exactly cancels .apart-iso's angle, which turns a sheet to face the reader. */
+@keyframes apart-open {
+  from {
+    transform: rotateZ(0deg) rotateX(0deg) translate3d(0, 0, calc(var(--depth) * var(--gap-open) * var(--gap-ratio))) scale(1);
+    animation-timing-function: var(--ease-move);
+  }
+
+  to {
+    transform: rotateZ(0deg) rotateX(0deg) translate3d(0, 0, calc(var(--depth) * var(--gap-open))) scale(1);
+  }
+}
+
+@keyframes apart-lift {
+  0%,
+  100% {
+    transform: rotateZ(0deg) rotateX(0deg) translate3d(0, 0, calc(var(--depth) * var(--gap-open))) scale(1);
+    animation-timing-function: var(--ease-move);
+  }
+
+  28%,
+  72% {
+    transform: rotateZ(32deg) rotateX(-56deg) translate3d(0, 0, var(--lift-z)) scale(var(--lift-scale));
+    animation-timing-function: var(--ease-move);
+  }
+}
+
+/* The last sheet stays up, so the section ends on it instead of an empty stack. */
+@keyframes apart-lift-last {
+  0% {
+    transform: rotateZ(0deg) rotateX(0deg) translate3d(0, 0, calc(var(--depth) * var(--gap-open))) scale(1);
+    animation-timing-function: var(--ease-move);
+  }
+
+  28%,
+  100% {
+    transform: rotateZ(32deg) rotateX(-56deg) translate3d(0, 0, var(--lift-z)) scale(var(--lift-scale));
+  }
+}
+
+@keyframes apart-trace {
+  from {
+    transform: translateZ(calc(var(--span) * -0.5 * var(--gap-ratio))) rotateX(90deg) scaleY(var(--gap-ratio));
+    animation-timing-function: var(--ease-move);
+  }
+
+  to {
+    transform: translateZ(calc(var(--span) * -0.5)) rotateX(90deg) scaleY(1);
+  }
+}
+
+@keyframes apart-intro {
+  to {
+    opacity: 0;
+    translate: 0 -1rem;
+  }
+}
+
+@keyframes apart-copy {
+  0%,
+  100% {
+    opacity: 0;
+    translate: 0 1rem;
+  }
+
+  18%,
+  82% {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+@keyframes apart-copy-last {
+  0% {
+    opacity: 0;
+    translate: 0 1rem;
+  }
+
+  18%,
+  100% {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+/* The bench */
+.bench {
+  padding-top: var(--gap-section);
+}
+
+.bench > .section-title {
+  margin-inline: var(--gutter);
+}
+
+.puzzle {
+  display: grid;
+  gap: var(--gap-group);
+  padding-top: clamp(40px, 6vw, 96px);
+}
+
+.puzzle .chapter-line {
+  font-size: calc(var(--step-chapter) * 0.62);
+}
+
+.puzzle-copy .chapter-about {
+  margin-top: var(--gap-group);
+}
+
+.puzzle-car {
+  width: 86%;
+  justify-self: end;
+  margin-right: calc(-1 * var(--gutter));
+}
+
+@media (min-width: 60rem) {
+  .puzzle {
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    align-items: end;
+  }
+
+  .puzzle-copy {
+    padding-bottom: clamp(40px, 6vw, 96px);
+  }
+}
+
+.bench-rows {
+  padding-inline: var(--gutter);
+}
+
+.bench-row {
+  display: grid;
+  gap: var(--gap-group);
+  padding-block: var(--gap-group);
+  border-top: 1px solid var(--rule);
+}
+
+.bench-row:first-child {
+  border-top: 0;
+}
+
+.bench-row h3 {
+  font: 500 var(--step-section) / 1 var(--display);
+  letter-spacing: -0.012em;
+}
+
+.bench-copy {
+  display: grid;
+  gap: 0.9em;
+  align-content: start;
+  max-width: 46ch;
+}
+
+.bench-row img {
+  width: 72%;
+}
+
+@media (min-width: 60rem) {
+  .bench-row {
+    grid-template-columns: minmax(0, 4fr) minmax(0, 4fr) minmax(0, 4fr);
+    align-items: center;
+  }
+
+  .bench-row img {
+    justify-self: end;
+    width: min(100%, 25rem);
+  }
+
+  .bench-butterfly-clutcher img {
+    width: min(82%, 20rem);
+    rotate: -7deg;
+  }
+
+  .bench-pixel-keychain img {
+    width: min(64%, 16rem);
+    rotate: 5deg;
+  }
+}
+
+/* Experience */
+.jobs {
+  border-bottom: 1px solid var(--rule);
+}
+
+.job {
+  border-top: 1px solid var(--rule);
+}
+
+.job summary {
+  position: relative;
+  display: grid;
+  gap: 0.15em;
+  padding-block: var(--gap-group);
+  padding-right: 2.5em;
+  cursor: pointer;
+  list-style: none;
+}
+
+.job summary::-webkit-details-marker {
+  display: none;
+}
+
+.job summary h3 {
+  font: 500 var(--step-lead) / 1.05 var(--display);
+}
+
+.job-when {
+  color: var(--ink-soft);
+}
+
+.job summary::after {
+  content: "+";
+  position: absolute;
+  top: var(--gap-group);
+  right: 0;
+  font: 400 var(--step-lead) / 1 var(--body);
+  transition: rotate 0.3s var(--ease-out);
+}
+
+.job[open] summary::after {
+  rotate: 45deg;
+}
+
+.job-body {
+  display: grid;
+  gap: 0.75em;
+  max-width: 62ch;
+  padding-bottom: var(--gap-group);
+}
+
+.job-body ul {
+  display: grid;
+  gap: 0.4em;
+  padding-left: 1.1em;
+  list-style: disc;
+}
+
+@media (min-width: 60rem) {
+  .job summary {
+    grid-template-columns: minmax(0, 4fr) minmax(0, 4fr) minmax(0, 3fr);
+    align-items: baseline;
     gap: var(--gap-group);
   }
 
-  .work-status {
-    justify-content: flex-end;
+  .job-body {
+    margin-left: calc((100% - 2.5em - 2 * var(--gap-group)) * 4 / 11 + var(--gap-group));
+  }
+}
+
+@supports selector(::details-content) {
+  @media (prefers-reduced-motion: no-preference) {
+    .job {
+      interpolate-size: allow-keywords;
+    }
+
+    .job::details-content {
+      block-size: 0;
+      overflow: clip;
+      transition:
+        block-size 0.35s var(--ease-out),
+        content-visibility 0.35s allow-discrete;
+    }
+
+    .job[open]::details-content {
+      block-size: auto;
+    }
+  }
+}
+
+.skills {
+  margin-top: var(--gap-group);
+}
+
+.skills h3 {
+  font: 500 var(--step-lead) / 1.05 var(--display);
+}
+
+.skills dl {
+  display: grid;
+  gap: 0.5em;
+  margin-top: 0.8em;
+}
+
+.skills dt {
+  color: var(--ink-soft);
+}
+
+@media (min-width: 48rem) {
+  .skills dl > div {
+    display: grid;
+    grid-template-columns: minmax(0, 3fr) minmax(0, 8fr);
+    gap: var(--gap-group);
+  }
+}
+
+/* About and Ask */
+.about-ask {
+  display: grid;
+  gap: var(--gap-section);
+}
+
+.about-copy {
+  display: grid;
+  gap: 1em;
+  max-width: 40ch;
+}
+
+.about-copy p:first-child {
+  font: 500 var(--step-lead) / 1.15 var(--display);
+}
+
+.about-copy p + p {
+  color: var(--ink-soft);
+}
+
+@media (min-width: 60rem) {
+  .about-ask {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    gap: var(--gap-group);
   }
 }
 
@@ -460,4 +1750,50 @@ input {
   color: var(--ink);
   font: inherit;
   font-weight: 600;
+}
+
+/* Small things that move with the scroll. Without scroll timelines each simply rests in its final place. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .marker {
+      animation: marker-wipe linear both;
+      animation-timeline: view();
+      animation-range: entry 70% cover 45%;
+    }
+
+    .pbx-box,
+    .puzzle-car {
+      animation: rise linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 40%;
+    }
+
+    .mac-hand {
+      animation: hand-in linear both;
+      animation-timeline: view();
+      animation-range: entry 30% cover 55%;
+    }
+  }
+}
+
+@keyframes marker-wipe {
+  from {
+    background-size: 0% 62%;
+  }
+
+  to {
+    background-size: 100% 62%;
+  }
+}
+
+@keyframes rise {
+  from {
+    translate: 0 14%;
+  }
+}
+
+@keyframes hand-in {
+  from {
+    translate: 40% 0;
+  }
 }

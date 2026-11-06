@@ -67,7 +67,11 @@ export function systemPrompt(): string {
   const work = projects.map((project) =>
     [
       `${project.name}.${project.line ? ` "${project.line}"` : ""} ${project.about}`,
-      bullets([...project.facts, `Status: ${project.status.text}`]),
+      bullets([
+        ...project.facts,
+        ...(project.layers ?? []).map(({ name, decision, body, rejected, cost }) => `${name} layer. ${decision} ${body} Rejected: ${rejected} Cost: ${cost}`),
+        `Status: ${project.status.text}`,
+      ]),
     ].join("\n"),
   );
 

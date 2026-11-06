@@ -32,7 +32,7 @@ Each chapter is full-bleed in its own palette. Site chrome stays neutral.
 | Project | Ground | Ink | Accent |
 |---|---|---|---|
 | Paperboxd | `#F2EDE1` | `#151513`, muted `#6A6456` | `#C0271C` for text (5.07:1); `#D23B26` only for large type and art (4.09:1) |
-| stickynotes | `#f3f2f2` | `#201f1d` | `#b68235` for art and large shapes only |
+| stickynotes | `#f2f2f2`, sampled from `sticky-hands.jpg` so the painting has no visible edge | `#201f1d` | `#b68235` for art and large shapes only |
 | thelocalcode | `#7f78c5` | `#151513` (4.70:1) | Red fails on this ground at every lightness: use ink for margin notes |
 | thelocalcode finale | `#194d15` | `--paper` (8.6:1) | `oklch(0.78 0.13 32)` for margin notes (4.7:1) |
 | puzzlecafe | `#e9c46a` | `#0b0d10` (11.7:1) | Ink for margin notes. Art: the gouache toy car held in a hand |
@@ -74,13 +74,13 @@ Depth comes from objects and paper, not from UI chrome. Flat sheets at real dept
 
 ## Do's and Don'ts
 
-**Do:** use the portrait as a cyanotype duotone. Draw anything that zooms or comes apart as SVG. Ease out with exponential curves. Prefer CSS scroll timelines over script. Show recordings of real work, with a pause button and a still poster.
+**Do:** draw anything that zooms or comes apart as SVG. Ease out with exponential curves. Prefer CSS scroll timelines over script. Show recordings of real work, with a pause button and a still poster.
 
-**Don't:** use gradient text, glass cards, custom cursors, three.js on the page, blueprint grids, side-stripe borders, identical card grids, hero metrics, a mono label above every section, or a client logo wall.
+**Don't:** show a photo of the author, use gradient text, glass cards, custom cursors, three.js on the page, blueprint grids, side-stripe borders, identical card grids, hero metrics, a mono label above every section, or a client logo wall.
 
 ## Responsive Behavior
 
-Check at 390, 768 and 1440px with no horizontal overflow. The wordmark and statements stay enormous on a phone and stack with the art; staggered tiles become one column with a varied rhythm. Reduced motion and unsupported browsers get still versions carrying the same content.
+Check at 390, 768 and 1440px with no horizontal overflow. The wordmark and statements stay enormous on a phone and stack with the art; tiles stay staggered in two columns on a phone and one row on a tablet. Reduced motion, unsupported browsers and phones get still versions carrying the same content; `scripts/check.mjs` fails if pinned copy stops fitting its stage.
 
 ## Agent Prompt Guide
 
