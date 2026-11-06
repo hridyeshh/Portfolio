@@ -4,20 +4,32 @@
   "description": "AI-powered portfolio with Gemini integration",
   "main": "src/js/local-server.js",
   "scripts": {
-    "start": "node src/js/local-server.js",
-    "dev": "node src/js/local-server.js"
+    "dev": "next dev --turbopack",
+    "build": "next build",
+    "start": "next start",
+    "lint": "oxlint app components lib scripts && { grep -rnE '#[0-9a-fA-F]{3,8}\\b|\\b[0-9]+px\\b' app components --include='*.tsx'; test $? = 1; }",
+    "test": "node --test lib/*.test.ts",
+    "test:live:site": "node --test lib/chat.live.ts",
+    "dev:legacy": "node src/js/local-server.js",
+    "test:legacy": "node --test tests/chat.test.js tests/page.test.js",
+    "test:live": "node --test tests/live.test.js",
+    "test:deploy": "node --test tests/deploy.test.js"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^1.6.0",
     "@vercel/analytics": "^1.5.0",
     "@vercel/speed-insights": "^1.2.0",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
+    "next": "15.5.29",
     "node-fetch": "^2.6.7",
-    "nodemon": "^3.1.11"
+    "nodemon": "^3.1.11",
+    "react": "19.1.10",
+    "react-dom": "19.1.10"
   },
   "engines": {
-    "node": ">=16.0.0"
+    "node": ">=22.18.0"
   },
   "keywords": [
     "portfolio",
@@ -26,5 +38,13 @@
     "vercel"
   ],
   "author": "Hridyesh Kumar",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^22.20.5",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "oxlint": "^1.92.0",
+    "playwright-core": "^1.65.0",
+    "typescript": "^5.9.3"
+  }
 }

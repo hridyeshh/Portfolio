@@ -1,0 +1,463 @@
+/* Tokens first; everything below uses only these. Raw hex or px in .tsx fails lint. */
+:root {
+  color-scheme: dark;
+
+  /* Brand. Contrast figures are in DESIGN.md. */
+  --cyanotype: oklch(0.27 0.085 258);
+  --paper: oklch(0.95 0.018 85);
+  --pencil-on-dark: oklch(0.74 0.15 32);
+  --pencil-on-light: oklch(0.5 0.18 29);
+
+  /* Project chapters. Each keeps its own palette. */
+  --pbx-ground: #f2ede1;
+  --pbx-ink: #151513;
+  --pbx-muted: #6a6456;
+  --pbx-accent-text: #c0271c; /* #d23b26 fails 4.5:1, so it is for large type and art only */
+  --pbx-accent-art: #d23b26;
+  --sticky-ground: #f3f2f2;
+  --sticky-ink: #201f1d;
+  --sticky-amber: #b68235; /* art and large shapes only */
+  --tlc-ground: #7f78c5;
+  --tlc-ink: #151513; /* red fails on this ground at every lightness, so margin notes use ink */
+  --tlc-finale-ground: #194d15;
+  --tlc-finale-ink: var(--paper);
+  --tlc-finale-note: oklch(0.78 0.13 32);
+  --puzzle-ground: #e9c46a;
+  --puzzle-ink: #0b0d10;
+
+  /* Roles */
+  --ground: var(--cyanotype);
+  --ink: var(--paper);
+  /* oklab, not oklch: the hue arc from paper to cyanotype runs through green. */
+  --ink-soft: color-mix(in oklab, var(--paper) 78%, var(--cyanotype));
+  --rule: color-mix(in oklab, var(--paper) 30%, var(--cyanotype));
+  --pencil: var(--pencil-on-dark);
+
+  /* Type */
+  --display: var(--font-display), "Iowan Old Style", Georgia, serif;
+  --body: var(--font-body), system-ui, sans-serif;
+  --hand: var(--font-hand), "Segoe Print", cursive;
+  --figure: var(--font-figure), ui-monospace, monospace;
+
+  --step-chip: 0.75rem;
+  --step-small: clamp(0.8125rem, 0.78rem + 0.14vw, 0.9375rem);
+  --step-body: clamp(1.0625rem, 1.03rem + 0.14vw, 1.1875rem);
+  --step-note: clamp(1.375rem, 1.3rem + 0.3vw, 1.625rem);
+  --step-lead: clamp(1.625rem, 1.4rem + 1vw, 2.5rem);
+  --step-section: clamp(2.75rem, 2rem + 3.3vw, 5rem);
+  --step-statement: clamp(3rem, 1.7rem + 5.5vw, 6.5rem);
+
+  /* Fitted to the measured width of each string in the display face, so they fill their container at every size. */
+  --fit-wordmark: 0.2895;
+  --fit-email: 0.1023;
+
+  /* Space */
+  --gutter: clamp(16px, 1.67vw, 24px);
+  --nav-top: clamp(12px, 1.4vw, 20px);
+  --masthead-top: 2.625rem;
+  --gap-section: clamp(72px, 11vw, 168px);
+  --gap-group: clamp(20px, 3vw, 36px);
+  --gap-tight: 0.6em;
+
+  --radius-pill: 99em;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  background: var(--ground);
+  scroll-padding-top: var(--masthead-top);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+body {
+  margin: 0;
+  background: var(--ground);
+  color: var(--ink);
+  font: 400 var(--step-body) / 1.6 var(--body);
+  overflow-x: clip;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+p,
+ul,
+ol {
+  margin: 0;
+}
+
+ul,
+ol {
+  padding: 0;
+  list-style: none;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+a {
+  color: inherit;
+  text-underline-offset: 0.2em;
+}
+
+button,
+input {
+  font: inherit;
+  color: inherit;
+}
+
+::selection {
+  background: var(--paper);
+  color: var(--cyanotype);
+}
+
+:focus-visible {
+  outline: 2px solid var(--pencil);
+  outline-offset: 3px;
+}
+
+.sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.skip {
+  position: fixed;
+  top: -5rem;
+  left: var(--gutter);
+  z-index: 20;
+  padding: 0.6em 1em;
+  border-radius: var(--radius-pill);
+  background: var(--paper);
+  color: var(--cyanotype);
+  font-weight: 600;
+}
+
+.skip:focus {
+  top: var(--nav-top);
+}
+
+/* Pill nav. The cyanotype ring disappears on the blue ground and gives the paper pill an edge on light chapters. */
+.nav {
+  position: fixed;
+  top: var(--nav-top);
+  right: var(--gutter);
+  left: var(--gutter);
+  z-index: 10;
+  display: flex;
+  justify-content: space-between;
+  pointer-events: none;
+}
+
+.pill {
+  display: flex;
+  padding-inline: 0.55em;
+  border-radius: var(--radius-pill);
+  background: var(--paper);
+  box-shadow: 0 0 0 1px var(--cyanotype);
+  color: var(--cyanotype);
+  font: 600 var(--step-small) / 1 var(--body);
+  pointer-events: auto;
+}
+
+.pill a {
+  display: block;
+  padding: 0.62em 0.6em;
+  border-radius: var(--radius-pill);
+  text-decoration: none;
+  transition: background-color 0.2s var(--ease-out);
+}
+
+@media (hover: hover) {
+  .pill a:hover {
+    background: color-mix(in oklab, var(--cyanotype) 14%, transparent);
+  }
+}
+
+/* Wordmark: full-bleed, sized from its container so a classic scrollbar can't push it off the edge. */
+.wordmark {
+  container-type: inline-size;
+  margin-inline: var(--gutter);
+  font-weight: 500;
+}
+
+.wordmark span {
+  display: block;
+  padding-bottom: 0.21em; /* the y's tail hangs below this tight line box */
+  font: 500 calc(100cqw * var(--fit-wordmark)) / 0.86 var(--display);
+  letter-spacing: -0.015em;
+  white-space: nowrap;
+}
+
+.masthead {
+  padding-top: var(--masthead-top);
+}
+
+.statement {
+  margin: var(--gap-group) var(--gutter) 0;
+  max-width: 14ch;
+  font: 500 var(--step-statement) / 1.02 var(--display);
+  letter-spacing: -0.012em;
+  text-wrap: balance;
+}
+
+.support {
+  margin: var(--gap-tight) var(--gutter) 0;
+  color: var(--ink-soft);
+  font-size: var(--step-lead);
+  line-height: 1.3;
+}
+
+.section {
+  padding: var(--gap-section) var(--gutter) 0;
+}
+
+.section-title {
+  margin-bottom: var(--gap-group);
+  font: 500 var(--step-section) / 1 var(--display);
+  letter-spacing: -0.012em;
+}
+
+.prose {
+  display: grid;
+  gap: 1em;
+  max-width: 62ch;
+}
+
+/* Tag chip: the one place small caps with tracking are allowed. */
+.chip {
+  display: inline-block;
+  padding: 0.5em 0.85em;
+  border-radius: var(--radius-pill);
+  background: var(--ink);
+  color: var(--ground);
+  font: 600 var(--step-chip) / 1 var(--body);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* Margin note: Caveat in red pencil, a few words at a time. */
+.note {
+  display: inline-block;
+  color: var(--pencil);
+  font: 600 var(--step-note) / 1 var(--hand);
+  rotate: -3deg;
+}
+
+/* Work index. Chapters and tiles replace the top of this on the finished home page. */
+.work > li {
+  display: grid;
+  gap: var(--gap-tight);
+  padding-block: var(--gap-group);
+  border-top: 1px solid var(--rule);
+}
+
+.work h3 {
+  font: 500 var(--step-lead) / 1.05 var(--display);
+}
+
+.work-copy {
+  display: grid;
+  gap: 0.35em;
+  max-width: 62ch;
+}
+
+.work-line {
+  font: 500 var(--step-lead) / 1.1 var(--display);
+  text-wrap: balance;
+}
+
+.work-status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  align-self: start;
+  gap: 0.5em 0.9em;
+  font-size: var(--step-small);
+}
+
+@media (min-width: 48rem) {
+  .work > li {
+    grid-template-columns: minmax(0, 3fr) minmax(0, 6fr) minmax(0, 3fr);
+    gap: var(--gap-group);
+  }
+
+  .work-status {
+    justify-content: flex-end;
+  }
+}
+
+/* Buttons share the nav pill's language. */
+.button {
+  padding: 0.6em 1.05em;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--paper);
+  color: var(--cyanotype);
+  font-weight: 600;
+  line-height: 1.2;
+  cursor: pointer;
+  transition:
+    background-color 0.2s var(--ease-out),
+    color 0.2s var(--ease-out);
+}
+
+.button:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.button-quiet {
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--rule);
+  color: var(--ink);
+  font-weight: 400;
+  text-align: left;
+}
+
+@media (hover: hover) {
+  .button-quiet:hover:not(:disabled) {
+    background: color-mix(in oklab, var(--paper) 14%, transparent);
+  }
+}
+
+/* Ask */
+.ask {
+  max-width: 62ch;
+}
+
+.ask > * + * {
+  margin-top: var(--gap-group);
+}
+
+.ask > .ask-log:empty {
+  margin-top: 0;
+}
+
+.ask-label {
+  color: var(--ink-soft);
+}
+
+.ask-suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6em;
+}
+
+.ask-log {
+  display: grid;
+  gap: var(--gap-group);
+}
+
+.ask-exchange {
+  display: grid;
+  gap: 0.4em;
+}
+
+.ask-log .note {
+  justify-self: start;
+}
+
+.ask-question {
+  font-weight: 600;
+}
+
+.ask-answer {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.ask-form {
+  display: flex;
+  align-items: center;
+  gap: 0.75em;
+}
+
+.ask-form input {
+  flex: 1;
+  min-width: 0;
+  padding: 0.6em 0;
+  border: 0;
+  border-bottom: 1px solid var(--ink-soft);
+  border-radius: 0;
+  background: transparent;
+}
+
+.ask-form input::placeholder {
+  color: var(--ink-soft);
+  opacity: 1;
+}
+
+/* Footer */
+.footer {
+  display: grid;
+  gap: var(--gap-group);
+  padding-top: var(--gap-section);
+}
+
+.footer > :not(.wordmark) {
+  margin-inline: var(--gutter);
+}
+
+.signoff {
+  font: 500 var(--step-section) / 1.02 var(--display);
+  letter-spacing: -0.012em;
+  text-wrap: balance;
+}
+
+.email {
+  container-type: inline-size;
+}
+
+.email a {
+  display: block;
+  font: 500 calc(100cqw * var(--fit-email)) / 1 var(--display);
+  letter-spacing: -0.012em;
+  text-decoration-thickness: 0.04em;
+  white-space: nowrap;
+}
+
+.copy {
+  display: flex;
+  align-items: center;
+  gap: 0.75em;
+}
+
+.elsewhere {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4em 1.25em;
+}
+
+.colophon {
+  display: grid;
+  gap: 0.5em;
+  max-width: 62ch;
+  color: var(--ink-soft);
+  font-size: var(--step-small);
+}
+
+.colophon h2 {
+  color: var(--ink);
+  font: inherit;
+  font-weight: 600;
+}
