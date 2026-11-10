@@ -1,50 +1,36 @@
 /* Tokens first; everything below uses only these. Raw hex or px in .tsx fails lint. */
 :root {
-  color-scheme: dark;
+  color-scheme: light;
 
-  /* Brand. Contrast figures are in DESIGN.md. */
-  --cyanotype: oklch(0.27 0.085 258);
-  --paper: oklch(0.95 0.018 85);
-  --pencil-on-dark: oklch(0.74 0.15 32);
+  --black: #141210;
+  --paper: #f4f3ef;
+  --yellow: #ffd93b;
+  --bench: #2f5c4a; /* the cutting mat at the end */
+  --bench-line: color-mix(in oklab, var(--paper) 7%, transparent);
+
+  /* Roles, which a section can override */
+  --ink: var(--black);
+  --ground: var(--paper);
+  --ink-soft: color-mix(in oklab, var(--black) 72%, var(--paper));
+  --rule: color-mix(in oklab, var(--black) 30%, var(--paper));
   --pencil-on-light: oklch(0.5 0.18 29);
+  --pencil: var(--pencil-on-light);
 
-  /* The painted stack in hero-1, sampled, so the sheets in the take-apart figure are the same sheets. */
+  /* The take-apart figure's sheets */
   --sheet-white: rgb(253 253 249);
   --sheet-ink: oklch(0.24 0.05 258);
   --stack-kraft: rgb(185 133 77);
   --stack-mustard: rgb(233 165 40);
   --stack-terracotta: rgb(206 78 50);
   --stack-green: rgb(34 94 60);
-
-  /* Project chapters. Each keeps its own palette. */
-  --pbx-ground: #f2ede1;
   --pbx-ink: #151513;
-  --pbx-muted: #6a6456;
-  --pbx-accent-text: #c0271c; /* #d23b26 fails 4.5:1, so it is for large type and art only */
-  --pbx-accent-art: #d23b26;
-  --sticky-ground: #f2f2f2; /* sampled from sticky-hands.jpg, so the painting has no visible edge */
-  --sticky-ink: #201f1d;
-  --sticky-amber: #b68235; /* art and large shapes only */
-  --sticky-marker: rgb(240 196 25 / 0.38); /* the extension's own yellow highlight */
-  --tlc-ground: #7f78c5;
-  --tlc-ink: #151513; /* red fails on this ground at every lightness, so margin notes use ink */
-  --tlc-finale-ground: #194d15;
-  --tlc-finale-ink: var(--paper);
   --tlc-finale-note: oklch(0.78 0.13 32);
-  --puzzle-ground: #e9c46a;
-  --puzzle-ink: #0b0d10;
-
-  /* Roles */
-  --ground: var(--cyanotype);
-  --ink: var(--paper);
-  /* oklab, not oklch: the hue arc from paper to cyanotype runs through green. */
-  --ink-soft: color-mix(in oklab, var(--paper) 78%, var(--cyanotype));
-  --rule: color-mix(in oklab, var(--paper) 30%, var(--cyanotype));
-  --pencil: var(--pencil-on-dark);
 
   /* Type */
-  --display: var(--font-display), "Iowan Old Style", Georgia, serif;
-  --body: var(--font-body), system-ui, sans-serif;
+  --display: var(--font-sentence), "Atkinson Hyperlegible Next", system-ui, sans-serif;
+  --read: var(--font-body), system-ui, sans-serif;
+  --body: var(--read);
+  --caslon: var(--font-caslon), "Iowan Old Style", Georgia, serif;
   --hand: var(--font-hand), "Segoe Print", cursive;
   --figure: var(--font-figure), ui-monospace, monospace;
 
@@ -58,11 +44,8 @@
   --step-statement: clamp(3rem, 1.7rem + 5.5vw, 6.5rem);
   --step-chapter: clamp(3.25rem, 1.5rem + 9.5vw, 11rem);
 
-  /* Fitted to the measured width of each string in the display face, so they fill their container at every size. */
-  --fit-wordmark: 0.2895;
-  --fit-email: 0.1023;
-
   /* Space */
+  --gut: clamp(16px, 3vw, 40px);
   --gutter: clamp(16px, 1.67vw, 24px);
   --nav-top: clamp(12px, 1.4vw, 20px);
   --masthead-top: 2.625rem;
@@ -72,6 +55,7 @@
 
   --radius-pill: 99em;
   --radius-tile: clamp(12px, 1.2vw, 20px);
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-move: cubic-bezier(0.65, 0, 0.35, 1);
@@ -83,8 +67,7 @@
 
 html {
   -webkit-text-size-adjust: 100%;
-  background: var(--ground);
-  scroll-padding-top: var(--masthead-top);
+  background: var(--yellow);
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -95,9 +78,9 @@ html {
 
 body {
   margin: 0;
-  background: var(--ground);
+  background: var(--yellow);
   color: var(--ink);
-  font: 400 var(--step-body) / 1.6 var(--body);
+  font: 400 18px / 1.45 var(--read);
   overflow-x: clip;
   -webkit-font-smoothing: antialiased;
 }
@@ -127,7 +110,7 @@ img {
 
 a {
   color: inherit;
-  text-underline-offset: 0.2em;
+  text-underline-offset: 0.18em;
 }
 
 button,
@@ -137,14 +120,28 @@ input {
 }
 
 ::selection {
-  background: var(--paper);
-  color: var(--cyanotype);
+  background: var(--black);
+  color: var(--paper);
 }
 
 :focus-visible {
-  outline: 2px solid var(--pencil);
+  outline: 3px solid currentColor;
   outline-offset: 3px;
+  border-radius: 4px;
 }
+
+[tabindex="-1"]:focus {
+  outline: none;
+}
+
+/* Each project keeps its own colours, wherever it appears. */
+.tone-paperboxd { --g: #cc3620; --i: #fdf6e8; }
+.tone-stickynotes { --g: #f2f2f2; --i: #201f1d; }
+.tone-thelocalcode { --g: #7f78c5; --i: #151513; }
+.tone-puzzlecafe { --g: #e9c46a; --i: #0b0d10; }
+.tone-desky { --g: #14231c; --i: #e8f3ea; }
+.tone-butterfly-clutcher { --g: #f4b6cf; --i: #1c1830; }
+.tone-pixel-keychain { --g: #a8d8f0; --i: #0e2430; }
 
 .sr {
   position: absolute;
@@ -155,7 +152,7 @@ input {
   white-space: nowrap;
 }
 
-.skip {
+.skip-link {
   position: fixed;
   top: -5rem;
   left: var(--gutter);
@@ -163,454 +160,12 @@ input {
   padding: 0.6em 1em;
   border-radius: var(--radius-pill);
   background: var(--paper);
-  color: var(--cyanotype);
+  color: var(--black);
   font-weight: 600;
 }
 
-.skip:focus {
+.skip-link:focus {
   top: var(--nav-top);
-}
-
-/* Each project keeps its palette wherever it appears: tile, chapter or band. */
-.tone {
-  background: var(--ground);
-  color: var(--ink);
-}
-
-.tone ::selection {
-  background: var(--ink);
-  color: var(--ground);
-}
-
-.tone-paperboxd {
-  --ground: var(--pbx-ground);
-  --ink: var(--pbx-ink);
-  --ink-soft: var(--pbx-muted);
-  --pencil: var(--pbx-accent-text);
-}
-
-.tone-stickynotes {
-  --ground: var(--sticky-ground);
-  --ink: var(--sticky-ink);
-  --ink-soft: color-mix(in oklab, var(--sticky-ink) 78%, var(--sticky-ground));
-  --pencil: var(--pencil-on-light);
-}
-
-.tone-thelocalcode {
-  --ground: var(--tlc-ground);
-  --ink: var(--tlc-ink);
-  --ink-soft: var(--tlc-ink);
-  --pencil: var(--tlc-ink);
-}
-
-.tone-puzzlecafe {
-  --ground: var(--puzzle-ground);
-  --ink: var(--puzzle-ink);
-  --ink-soft: var(--puzzle-ink);
-  --pencil: var(--puzzle-ink);
-}
-
-/* Pill nav. The cyanotype ring disappears on the blue ground and gives the paper pill an edge on light chapters. */
-.nav {
-  position: fixed;
-  top: var(--nav-top);
-  right: var(--gutter);
-  left: var(--gutter);
-  z-index: 10;
-  display: flex;
-  justify-content: space-between;
-  pointer-events: none;
-}
-
-.pill {
-  display: flex;
-  padding-inline: 0.55em;
-  border-radius: var(--radius-pill);
-  background: var(--paper);
-  box-shadow: 0 0 0 1px var(--cyanotype);
-  color: var(--cyanotype);
-  font: 600 var(--step-small) / 1 var(--body);
-  pointer-events: auto;
-}
-
-.pill a {
-  display: block;
-  padding: 0.62em 0.6em;
-  border-radius: var(--radius-pill);
-  text-decoration: none;
-  transition: background-color 0.2s var(--ease-out);
-}
-
-@media (hover: hover) {
-  .pill a:hover {
-    background: color-mix(in oklab, var(--cyanotype) 14%, transparent);
-  }
-}
-
-/* Wordmark: full-bleed, sized from its container so a classic scrollbar can't push it off the edge. */
-.wordmark {
-  container-type: inline-size;
-  margin-inline: var(--gutter);
-  font-weight: 500;
-}
-
-.wordmark span {
-  display: block;
-  padding-bottom: 0.21em; /* the y's tail hangs below this tight line box */
-  font: 500 calc(100cqw * var(--fit-wordmark)) / 0.86 var(--display);
-  letter-spacing: -0.015em;
-  white-space: nowrap;
-}
-
-/* Masthead. Sized in --u, a design pixel of the comp at each width, so the composition holds at every size. */
-.masthead {
-  container-type: inline-size;
-  overflow-x: clip;
-  padding-top: var(--masthead-top);
-}
-
-.masthead .wordmark span {
-  padding-bottom: 0; /* here the painted sheet covers the y's tail, on purpose */
-}
-
-.stage {
-  --u: calc(100cqw / 390);
-  position: relative;
-  height: calc(790 * var(--u));
-  margin-top: calc(8 * var(--u));
-}
-
-.hero-art {
-  position: absolute;
-  top: 0;
-  left: calc(-96 * var(--u));
-  width: calc(600 * var(--u));
-}
-
-.hero-art > img {
-  width: 100%;
-}
-
-/* The ground is the painted sheet's own white, so the text stays readable before the art arrives. */
-.hero-sheet {
-  position: absolute;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: calc(6 * var(--u));
-  padding: calc(10 * var(--u)) calc(30 * var(--u));
-  background: var(--sheet-white);
-  color: var(--sheet-ink);
-}
-
-.statement {
-  font: 500 calc(33 * var(--u)) / 0.98 var(--display);
-  letter-spacing: -0.012em;
-  text-wrap: balance;
-}
-
-.support {
-  font-size: max(0.75rem, calc(12.5 * var(--u)));
-  line-height: 1.3;
-}
-
-.hero-sheet .hero-note {
-  align-self: flex-start;
-  color: var(--pencil-on-light);
-  font-size: calc(21 * var(--u));
-  text-decoration: none;
-}
-
-@media (hover: hover) {
-  .hero-note:hover {
-    text-decoration: underline;
-  }
-}
-
-.tile {
-  --dx: 0;
-  position: absolute;
-  top: calc(var(--y) * var(--u));
-  left: calc(var(--gutter) + var(--dx) * var(--u));
-  width: calc(var(--w) * var(--u));
-  height: calc(var(--h) * var(--u));
-  border-radius: var(--radius-tile);
-}
-
-.tile-paperboxd {
-  --y: 346;
-  --w: 170;
-  --h: 226;
-}
-
-.tile-puzzlecafe {
-  --dx: 180;
-  --y: 330;
-  --w: 178;
-  --h: 232;
-}
-
-.tile-stickynotes {
-  --y: 582;
-  --w: 170;
-  --h: 200;
-}
-
-.tile-thelocalcode {
-  --dx: 180;
-  --y: 572;
-  --w: 178;
-  --h: 210;
-}
-
-.tile a {
-  position: absolute;
-  inset: 0;
-  display: block;
-  overflow: hidden;
-  border-radius: inherit;
-  text-decoration: none;
-}
-
-.tile a:focus-visible {
-  outline-color: var(--paper); /* it sits on the blue, whatever the tile's own pencil is */
-}
-
-.tile-name {
-  position: absolute;
-  z-index: 1;
-  top: calc(8 * var(--u));
-  left: calc(11 * var(--u));
-  font: 500 calc(26 * var(--u)) / 1 var(--display);
-}
-
-.tile .chip {
-  position: absolute;
-  z-index: 1;
-  bottom: calc(11 * var(--u));
-  left: calc(11 * var(--u));
-  font-size: max(0.625rem, calc(9 * var(--u)));
-  letter-spacing: 0.02em;
-}
-
-.tile img {
-  position: absolute;
-  max-width: none;
-}
-
-.tile-paperboxd img {
-  top: 18%;
-  left: 8%;
-  width: 84%;
-}
-
-.tile-puzzlecafe img {
-  top: 18%;
-  left: 8%;
-  width: 92%;
-  height: 82%;
-  object-fit: contain;
-  object-position: 100% 100%;
-}
-
-.tile-stickynotes img {
-  top: 26%;
-  left: -30%;
-  width: 160%;
-}
-
-.tile-thelocalcode img {
-  top: 26%;
-  left: 22%;
-  width: 56%;
-}
-
-@media (min-width: 48rem) {
-  .stage {
-    --u: calc(100cqw / 768);
-    height: calc(940 * var(--u));
-    margin-top: calc(-4 * var(--u));
-  }
-
-  /* The phone's scale, so both sleeves leave the frame instead of ending in a cut edge. */
-  .hero-art {
-    left: calc(-189 * var(--u));
-    width: calc(1183 * var(--u));
-  }
-
-  .hero-sheet {
-    gap: calc(12 * var(--u));
-    padding: calc(24 * var(--u)) calc(48 * var(--u));
-  }
-
-  .statement {
-    font-size: calc(66 * var(--u));
-  }
-
-  .support {
-    font-size: calc(19 * var(--u));
-  }
-
-  .hero-sheet .hero-note {
-    font-size: calc(32 * var(--u));
-  }
-
-  .tile-paperboxd {
-    --y: 664;
-    --w: 176;
-    --h: 250;
-  }
-
-  .tile-puzzlecafe {
-    --dx: 184;
-    --y: 690;
-    --w: 176;
-    --h: 232;
-  }
-
-  .tile-stickynotes {
-    --dx: 368;
-    --y: 672;
-    --w: 176;
-    --h: 250;
-  }
-
-  .tile-thelocalcode {
-    --dx: 552;
-    --y: 696;
-    --w: 176;
-    --h: 236;
-  }
-
-  .tile-name {
-    font-size: calc(25 * var(--u));
-  }
-}
-
-@media (min-width: 64rem) {
-  .stage {
-    --u: calc(100cqw / 1440);
-    height: calc(588 * var(--u)); /* the art's own height, so its sleeves run straight into the next chapter */
-    margin-top: calc(-10 * var(--u));
-  }
-
-  .hero-art {
-    left: calc(450 * var(--u)); /* the sleeve's cut edge hides behind the tiles */
-    width: calc(990 * var(--u));
-  }
-
-  .hero-sheet {
-    gap: calc(12 * var(--u));
-    padding: calc(26 * var(--u)) calc(44 * var(--u));
-  }
-
-  .statement {
-    font-size: calc(70 * var(--u));
-  }
-
-  .support {
-    font-size: max(0.875rem, calc(18 * var(--u)));
-  }
-
-  /* On the blue beside the sheet, in the red made for it. */
-  .hero-sheet .hero-note {
-    position: absolute;
-    top: calc(33 * var(--u));
-    left: calc(-203 * var(--u));
-    width: calc(210 * var(--u));
-    color: var(--pencil-on-dark);
-    font-size: calc(36 * var(--u));
-    rotate: -5deg;
-  }
-
-  .tile-paperboxd {
-    --y: 28;
-    --w: 206;
-    --h: 252;
-  }
-
-  .tile-puzzlecafe {
-    --dx: 218;
-    --y: 62;
-    --w: 214;
-    --h: 232;
-  }
-
-  .tile-stickynotes {
-    --dx: 0;
-    --y: 292;
-    --w: 206;
-    --h: 270;
-  }
-
-  .tile-thelocalcode {
-    --dx: 218;
-    --y: 306;
-    --w: 214;
-    --h: 270;
-  }
-
-  .tile-name {
-    top: calc(8.4 * var(--u));
-    left: calc(12 * var(--u));
-    font-size: calc(30 * var(--u));
-  }
-
-  .tile .chip {
-    bottom: calc(12 * var(--u));
-    left: calc(12 * var(--u));
-    font-size: max(0.625rem, calc(10 * var(--u)));
-  }
-
-  .tile-paperboxd img {
-    top: auto;
-    bottom: 6%;
-  }
-
-  .tile-stickynotes img {
-    left: 0;
-    width: 100%;
-  }
-
-  .tile-thelocalcode img {
-    top: 24%;
-    left: 20%;
-    width: 60%;
-  }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .tile {
-    animation: settle 0.8s var(--ease-expo) both;
-    animation-delay: calc(var(--i) * 70ms);
-  }
-
-  .tile img {
-    transition: translate 0.5s var(--ease-out);
-  }
-
-  @media (hover: hover) {
-    .tile a:hover img {
-      translate: 0 -2%;
-    }
-  }
-}
-
-@keyframes settle {
-  from {
-    opacity: 0;
-    translate: 0 1.25rem;
-  }
-}
-
-.section {
-  padding: var(--gap-section) var(--gutter) 0;
-}
-
-.section-title {
-  margin-bottom: var(--gap-group);
-  font: 500 var(--step-section) / 1 var(--display);
-  letter-spacing: -0.012em;
 }
 
 /* Tag chip: the one place small caps with tracking are allowed. */
@@ -634,50 +189,6 @@ input {
   rotate: -3deg;
 }
 
-.status {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.5em 0.9em;
-  font-size: var(--step-small);
-}
-
-/* Chapters. One idea per screen, and no two composed alike. */
-.chapter {
-  overflow: clip;
-}
-
-.chapter-inner {
-  position: relative;
-  padding: var(--gap-section) var(--gutter) 0;
-}
-
-.chapter-name {
-  font: 500 var(--step-lead) / 1.05 var(--display);
-}
-
-.chapter-line {
-  margin-top: 0.14em;
-  font: 500 var(--step-chapter) / 0.96 var(--display);
-  letter-spacing: -0.018em;
-  text-wrap: balance;
-}
-
-.chapter-note {
-  display: block;
-  width: fit-content;
-  margin-top: 0.5em;
-}
-
-.chapter-about {
-  max-width: 46ch;
-  color: var(--ink-soft);
-}
-
-.chapter-about + .status {
-  margin-top: 1.1em;
-}
-
 .loop {
   position: relative;
   overflow: hidden;
@@ -698,7 +209,7 @@ input {
   border: 0;
   border-radius: var(--radius-pill);
   background: var(--paper);
-  color: var(--cyanotype);
+  color: var(--black);
   font: 600 var(--step-chip) / 1 var(--body);
   cursor: pointer;
 }
@@ -710,211 +221,7 @@ input {
 }
 
 .loop-toggle:focus-visible {
-  outline-color: var(--cyanotype);
-}
-
-/* Paperboxd: the recording behind, the box held out in front of it. */
-.pbx-head {
-  position: relative;
-}
-
-.pbx .chapter-line {
-  line-height: 1.04; /* the y of "diary" runs into the d of "database" any tighter */
-}
-
-.pbx-loop .loop-toggle {
-  right: auto;
-  left: 0.75em; /* clear of the box held in front of it */
-}
-
-.pbx-copy {
-  margin-top: var(--gap-group);
-}
-
-.pbx-media {
-  position: relative;
-  margin-top: var(--gap-group);
-}
-
-.pbx-loop {
-  aspect-ratio: 16 / 10;
-  border-radius: var(--radius-tile);
-}
-
-.pbx-box {
-  position: relative;
-  width: 72%;
-  margin: -16% 0 0 auto;
-}
-
-@media (min-width: 60rem) {
-  .pbx {
-    display: grid;
-    grid-template-columns: minmax(0, 5fr) minmax(0, 8fr);
-    grid-template-areas:
-      "name name"
-      "head head"
-      "copy media";
-    column-gap: var(--gap-group);
-  }
-
-  .pbx .chapter-name {
-    grid-area: name;
-  }
-
-  .pbx-head {
-    grid-area: head;
-  }
-
-  .pbx-copy {
-    grid-area: copy;
-  }
-
-  .pbx-media {
-    grid-area: media;
-  }
-
-  .pbx-head .chapter-note {
-    position: absolute;
-    top: calc(var(--step-chapter) * 0.3);
-    left: calc(var(--step-chapter) * 3.1);
-    margin: 0;
-    font-size: calc(var(--step-note) * 1.5);
-  }
-
-  .pbx-box {
-    width: 56%;
-    margin-top: -24%;
-  }
-}
-
-/* stickynotes: centered on the notebook, with the line highlighted the way the extension does it. */
-.sticky {
-  text-align: center;
-}
-
-.sticky .chapter-line {
-  font-size: calc(var(--step-chapter) * 0.78);
-}
-
-.sticky .chapter-note {
-  margin-inline: auto;
-}
-
-.marker {
-  padding-inline: 0.06em;
-  border-radius: 0.08em 0.22em 0.12em 0.18em;
-  background: linear-gradient(var(--sticky-marker), var(--sticky-marker)) no-repeat 0 72% / 100% 62%;
-  color: inherit;
-  -webkit-box-decoration-break: clone;
-  box-decoration-break: clone;
-}
-
-.sticky-art {
-  width: 170%;
-  max-width: none;
-  margin: var(--gap-group) 0 0 -35%;
-}
-
-.sticky-foot {
-  padding-block: var(--gap-group);
-  text-align: left;
-}
-
-@media (min-width: 48rem) {
-  .sticky-art {
-    width: calc(100% + 2 * var(--gutter));
-    margin: 0 0 0 calc(-1 * var(--gutter));
-  }
-
-  .sticky-foot {
-    position: relative;
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    gap: var(--gap-group);
-    margin-top: -9%;
-  }
-
-  .sticky-foot .chapter-about {
-    max-width: 34ch;
-  }
-
-  .sticky .chapter-note {
-    position: absolute;
-    top: calc(var(--gap-section) + var(--step-chapter) * 2.05);
-    right: 9%;
-    margin: 0;
-    font-size: calc(var(--step-note) * 1.4);
-    rotate: 4deg;
-  }
-}
-
-/* thelocalcode: the site runs on the Mac, and a hand brings it the disk. */
-.tlc-copy .chapter-line {
-  font-size: calc(var(--step-chapter) * 0.86);
-}
-
-.tlc-copy .chapter-about {
-  margin-top: var(--gap-group);
-}
-
-.tlc-media {
-  margin-top: var(--gap-group);
-  padding-bottom: var(--gap-section);
-}
-
-.mac {
-  position: relative;
-  width: 66%;
-  margin-left: 4%;
-}
-
-.mac > img:first-child {
-  width: 100%;
-}
-
-/* The blank screen in mac.webp, from thelocalcode's own art data. */
-.mac-screen {
-  position: absolute;
-  top: 11.82%;
-  left: 12.39%;
-  width: 75.49%;
-  height: 44.86%;
-  border-radius: 3.5% / 4.5%;
-  background: var(--sheet-white);
-}
-
-.mac-hand {
-  position: absolute;
-  top: 56.7%;
-  left: 78%;
-  width: 116%;
-  max-width: none;
-}
-
-@media (min-width: 60rem) {
-  .tlc {
-    display: grid;
-    grid-template-columns: minmax(0, 7fr) minmax(0, 6fr);
-    align-items: end;
-    column-gap: var(--gap-group);
-    padding-bottom: var(--gap-section);
-  }
-
-  .tlc-media {
-    margin: 0;
-    padding: 0;
-  }
-
-  .mac {
-    width: 72%;
-    margin-left: 0;
-  }
-
-  .tlc-copy .chapter-note {
-    font-size: calc(var(--step-note) * 1.4);
-  }
+  outline-color: var(--black);
 }
 
 /* Take it apart. These defaults are the still version: every layer showing, every decision listed. */
@@ -1107,11 +414,11 @@ input {
 }
 
 .fig-display {
-  font: 500 40px var(--display);
+  font: 500 40px var(--caslon);
 }
 
 .fig-small {
-  font: 500 15px var(--display);
+  font: 500 15px var(--caslon);
 }
 
 .fig-body {
@@ -1124,7 +431,7 @@ input {
 }
 
 .fig-table {
-  font: 500 30px var(--display);
+  font: 500 30px var(--caslon);
 }
 
 .fig-column {
@@ -1360,249 +667,13 @@ input {
   }
 }
 
-/* The bench */
-.bench {
-  padding-top: var(--gap-section);
-}
-
-.bench > .section-title {
-  margin-inline: var(--gutter);
-}
-
-.puzzle {
-  display: grid;
-  gap: var(--gap-group);
-  padding-top: clamp(40px, 6vw, 96px);
-}
-
-.puzzle .chapter-line {
-  font-size: calc(var(--step-chapter) * 0.62);
-}
-
-.puzzle-copy .chapter-about {
-  margin-top: var(--gap-group);
-}
-
-.puzzle-car {
-  width: 86%;
-  justify-self: end;
-  margin-right: calc(-1 * var(--gutter));
-}
-
-@media (min-width: 60rem) {
-  .puzzle {
-    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
-    align-items: end;
-  }
-
-  .puzzle-copy {
-    padding-bottom: clamp(40px, 6vw, 96px);
-  }
-}
-
-.bench-rows {
-  padding-inline: var(--gutter);
-}
-
-.bench-row {
-  display: grid;
-  gap: var(--gap-group);
-  padding-block: var(--gap-group);
-  border-top: 1px solid var(--rule);
-}
-
-.bench-row:first-child {
-  border-top: 0;
-}
-
-.bench-row h3 {
-  font: 500 var(--step-section) / 1 var(--display);
-  letter-spacing: -0.012em;
-}
-
-.bench-copy {
-  display: grid;
-  gap: 0.9em;
-  align-content: start;
-  max-width: 46ch;
-}
-
-.bench-row img {
-  width: 72%;
-}
-
-@media (min-width: 60rem) {
-  .bench-row {
-    grid-template-columns: minmax(0, 4fr) minmax(0, 4fr) minmax(0, 4fr);
-    align-items: center;
-  }
-
-  .bench-row img {
-    justify-self: end;
-    width: min(100%, 25rem);
-  }
-
-  .bench-butterfly-clutcher img {
-    width: min(82%, 20rem);
-    rotate: -7deg;
-  }
-
-  .bench-pixel-keychain img {
-    width: min(64%, 16rem);
-    rotate: 5deg;
-  }
-}
-
-/* Experience */
-.jobs {
-  border-bottom: 1px solid var(--rule);
-}
-
-.job {
-  border-top: 1px solid var(--rule);
-}
-
-.job summary {
-  position: relative;
-  display: grid;
-  gap: 0.15em;
-  padding-block: var(--gap-group);
-  padding-right: 2.5em;
-  cursor: pointer;
-  list-style: none;
-}
-
-.job summary::-webkit-details-marker {
-  display: none;
-}
-
-.job summary h3 {
-  font: 500 var(--step-lead) / 1.05 var(--display);
-}
-
-.job-when {
-  color: var(--ink-soft);
-}
-
-.job summary::after {
-  content: "+";
-  position: absolute;
-  top: var(--gap-group);
-  right: 0;
-  font: 400 var(--step-lead) / 1 var(--body);
-  transition: rotate 0.3s var(--ease-out);
-}
-
-.job[open] summary::after {
-  rotate: 45deg;
-}
-
-.job-body {
-  display: grid;
-  gap: 0.75em;
-  max-width: 62ch;
-  padding-bottom: var(--gap-group);
-}
-
-.job-body ul {
-  display: grid;
-  gap: 0.4em;
-  padding-left: 1.1em;
-  list-style: disc;
-}
-
-@media (min-width: 60rem) {
-  .job summary {
-    grid-template-columns: minmax(0, 4fr) minmax(0, 4fr) minmax(0, 3fr);
-    align-items: baseline;
-    gap: var(--gap-group);
-  }
-
-  .job-body {
-    margin-left: calc((100% - 2.5em - 2 * var(--gap-group)) * 4 / 11 + var(--gap-group));
-  }
-}
-
-@supports selector(::details-content) {
-  @media (prefers-reduced-motion: no-preference) {
-    .job {
-      interpolate-size: allow-keywords;
-    }
-
-    .job::details-content {
-      block-size: 0;
-      overflow: clip;
-      transition:
-        block-size 0.35s var(--ease-out),
-        content-visibility 0.35s allow-discrete;
-    }
-
-    .job[open]::details-content {
-      block-size: auto;
-    }
-  }
-}
-
-.skills {
-  margin-top: var(--gap-group);
-}
-
-.skills h3 {
-  font: 500 var(--step-lead) / 1.05 var(--display);
-}
-
-.skills dl {
-  display: grid;
-  gap: 0.5em;
-  margin-top: 0.8em;
-}
-
-.skills dt {
-  color: var(--ink-soft);
-}
-
-@media (min-width: 48rem) {
-  .skills dl > div {
-    display: grid;
-    grid-template-columns: minmax(0, 3fr) minmax(0, 8fr);
-    gap: var(--gap-group);
-  }
-}
-
-/* About and Ask */
-.about-ask {
-  display: grid;
-  gap: var(--gap-section);
-}
-
-.about-copy {
-  display: grid;
-  gap: 1em;
-  max-width: 40ch;
-}
-
-.about-copy p:first-child {
-  font: 500 var(--step-lead) / 1.15 var(--display);
-}
-
-.about-copy p + p {
-  color: var(--ink-soft);
-}
-
-@media (min-width: 60rem) {
-  .about-ask {
-    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
-    gap: var(--gap-group);
-  }
-}
-
 /* Buttons share the nav pill's language. */
 .button {
   padding: 0.6em 1.05em;
   border: 0;
   border-radius: var(--radius-pill);
-  background: var(--paper);
-  color: var(--cyanotype);
+  background: var(--black);
+  color: var(--paper);
   font-weight: 600;
   line-height: 1.2;
   cursor: pointer;
@@ -1630,170 +701,195 @@ input {
   }
 }
 
-/* Ask */
-.ask {
-  max-width: 62ch;
-}
-
-.ask > * + * {
-  margin-top: var(--gap-group);
-}
-
-.ask > .ask-log:empty {
-  margin-top: 0;
-}
-
-.ask-label {
-  color: var(--ink-soft);
-}
-
-.ask-suggestions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.6em;
-}
-
-.ask-log {
-  display: grid;
-  gap: var(--gap-group);
-}
-
-.ask-exchange {
-  display: grid;
-  gap: 0.4em;
-}
-
-.ask-log .note {
-  justify-self: start;
-}
-
-.ask-question {
-  font-weight: 600;
-}
-
-.ask-answer {
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
-}
-
-.ask-form {
-  display: flex;
-  align-items: center;
-  gap: 0.75em;
-}
-
-.ask-form input {
-  flex: 1;
-  min-width: 0;
-  padding: 0.6em 0;
-  border: 0;
-  border-bottom: 1px solid var(--ink-soft);
-  border-radius: 0;
-  background: transparent;
-}
-
-.ask-form input::placeholder {
-  color: var(--ink-soft);
-  opacity: 1;
-}
-
-/* Footer */
-.footer {
-  display: grid;
-  gap: var(--gap-group);
-  padding-top: var(--gap-section);
-}
-
-.footer > :not(.wordmark) {
-  margin-inline: var(--gutter);
-}
-
-.signoff {
-  font: 500 var(--step-section) / 1.02 var(--display);
-  letter-spacing: -0.012em;
-  text-wrap: balance;
-}
-
-.email {
-  container-type: inline-size;
-}
-
-.email a {
-  display: block;
-  font: 500 calc(100cqw * var(--fit-email)) / 1 var(--display);
-  letter-spacing: -0.012em;
-  text-decoration-thickness: 0.04em;
-  white-space: nowrap;
-}
-
 .copy {
   display: flex;
   align-items: center;
   gap: 0.75em;
 }
 
-.elsewhere {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4em 1.25em;
+/* The approved home: the Sentence, the journey, the skip button, Experience and the end. */
+.gut { padding-left: max(var(--gut), env(safe-area-inset-left, 0px)); padding-right: max(var(--gut), env(safe-area-inset-right, 0px)); }
+.stick { filter: drop-shadow(3px 0 0 #fff) drop-shadow(-3px 0 0 #fff) drop-shadow(0 3px 0 #fff) drop-shadow(0 -3px 0 #fff) drop-shadow(0 8px 10px rgb(0 0 0 / 0.3)); }
+.stick-sm { filter: drop-shadow(1.5px 0 0 #fff) drop-shadow(-1.5px 0 0 #fff) drop-shadow(0 1.5px 0 #fff) drop-shadow(0 -1.5px 0 #fff) drop-shadow(0 2px 2px rgb(0 0 0 / 0.2)); }
+
+/* The Sentence */
+.hero { min-height: 100svh; display: flex; flex-direction: column; background: var(--hg, var(--yellow)); color: var(--hi, var(--ink)); transition: background-color 0.42s var(--ease), color 0.3s; font-family: var(--display); }
+.bar { display: flex; justify-content: space-between; gap: 16px; padding-block: 18px; font-size: clamp(16px, 1.4vw, 20px); font-weight: 600; }
+.bar a { text-decoration: none; }
+.bar a:hover { text-decoration: underline; }
+.bar span { display: flex; gap: clamp(14px, 2vw, 28px); }
+.say { flex: 1; display: flex; align-items: center; min-height: 0; transition: opacity 0.25s; }
+.hero.leaving .say, .hero.leaving .bar, .hero.leaving .hint { opacity: 0; transition: opacity 0.22s; }
+.say h1 { font-size: min(5.1vw, 8.2svh); line-height: 1.11; font-weight: 600; letter-spacing: -0.026em; text-wrap: pretty; }
+.w { text-decoration: underline; text-decoration-thickness: 0.05em; text-underline-offset: 0.12em; text-decoration-color: color-mix(in srgb, currentColor 32%, transparent); transition: text-decoration-color 0.2s; }
+.w:hover, .w:focus-visible { text-decoration-color: currentColor; }
+.o { display: inline-block; height: 1.06em; width: auto; vertical-align: -0.24em; margin-inline: 0.05em 0.12em; rotate: var(--r, -3deg); transition: rotate 0.35s var(--ease), scale 0.35s var(--ease); }
+.w:hover .o, .w:focus-visible .o { scale: 1.28; rotate: 3deg; }
+.hint { padding-block: 14px 22px; font-size: clamp(16px, 1.5vw, 22px); font-weight: 500; display: flex; align-items: center; gap: 0.5em; }
+.hint svg { width: 1em; height: 1em; }
+
+/* The journey: a sheet per project. The canvas sits between each sheet's big name and its copy. */
+#journey { position: relative; isolation: isolate; display: grid; grid-template-columns: minmax(0, 1fr); }
+.stage { grid-area: 1 / 1; position: sticky; top: 0; align-self: start; height: 100svh; z-index: 1; pointer-events: none; }
+.sheets { grid-area: 1 / 1; min-width: 0; }
+.stage canvas { display: block; width: 100%; height: 100%; }
+.stop { height: 190svh; display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); background: var(--g); color: var(--i); font-family: var(--display); }
+.name { grid-area: 1 / 1; position: sticky; top: 0; align-self: start; z-index: 0; height: 100svh; margin: 0; padding-block: clamp(10px, 2svh, 22px); font-size: min(14.2vw, 27svh); line-height: 0.9; font-weight: 700; letter-spacing: -0.045em; text-wrap: balance; }
+.stop { --name-size: min(14.2vw, 27svh); }
+.stop-copy { grid-area: 1 / 1; position: sticky; top: 0; align-self: start; z-index: 2; height: 100svh; display: grid; grid-template-rows: calc(var(--lines, 1) * var(--name-size) * 0.9 + clamp(10px, 2svh, 22px)) minmax(0, 1fr) auto; pointer-events: none; padding-bottom: clamp(20px, 4svh, 44px); }
+.more { grid-row: 2; align-self: center; pointer-events: auto; max-width: min(28em, 36vw); font: 400 clamp(16px, 1.3vw, 19px)/1.45 var(--read); text-wrap: pretty; }
+.about { grid-row: 3; pointer-events: auto; max-width: min(20em, 100%); display: grid; gap: 14px; justify-items: start; font-size: clamp(22px, 2.3vw, 33px); line-height: 1.14; font-weight: 600; letter-spacing: -0.012em; }
+.about p { text-wrap: pretty; }
+.sub { font: 500 16px/1.3 var(--read); letter-spacing: 0; }
+.meta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; font: 600 16px/1.3 var(--read); letter-spacing: 0; }
+.pill { display: inline-block; padding: 0.42em 0.8em; border-radius: 99em; background: var(--i); color: var(--g); font: 600 13px/1 var(--read); letter-spacing: 0.04em; text-transform: uppercase; white-space: nowrap; }
+.still { position: absolute; right: 7%; top: 53%; translate: 0 -50%; height: auto; width: auto; max-width: 46vw; max-height: 60svh; }
+.macstill { display: block; height: 60svh; aspect-ratio: 560 / 720; }
+.macstill img { display: block; width: 100%; height: 100%; }
+.macstill .macshot { position: absolute; left: 12.39%; top: 11.82%; width: 75.49%; height: 44.86%; object-fit: cover; border-radius: 4%; }
+/* The road runs under the middle of this sheet, so its paragraph sits up by the name. */
+@media (min-width: 761px) { #puzzlecafe .more { align-self: start; margin-top: 2svh; } }
+.gl .still { display: none; }
+.gl .stop.no3d .still { display: block; }
+.calm .stop { display: block; height: auto; min-height: 100svh; }
+.calm .name, .calm .stop-copy { position: relative; height: auto; margin: 0; }
+.calm .stop-copy { min-height: 72svh; grid-template-rows: minmax(0, 1fr) auto; }
+.calm .more { grid-row: 1; }
+.calm .about { grid-row: 2; }
+.calm .stage { display: none; }
+
+/* Skip: sticks to the bottom of the screen for the length of the journey, and only the journey. */
+.skipbar { position: sticky; bottom: 0; height: 0; z-index: 3; }
+.skip { --p: 0; --bg: var(--ink); --fg: #fff; --nudge: 0; position: absolute; right: max(16px, env(safe-area-inset-right, 0px)); bottom: calc(clamp(14px, 3svh, 28px) + env(safe-area-inset-bottom, 0px)); display: flex; align-items: center; border-radius: 99px; background: var(--bg); color: var(--fg); text-decoration: none; font: 600 16px/1 var(--read); box-shadow: 0 6px 18px rgb(0 0 0 / 0.24); transition: background-color 0.3s, color 0.3s, opacity 0.25s, visibility 0.25s, scale 0.3s var(--ease); }
+.skip.off { opacity: 0; visibility: hidden; }
+.skip:hover { scale: 1.04; }
+.skip:focus-visible { outline-offset: 4px; outline-color: var(--bg); }
+.skip-label { display: block; overflow: hidden; white-space: nowrap; max-width: 11.5em; transition: max-width 0.45s var(--ease); }
+.skip-label > span { display: block; padding-left: 22px; padding-right: 4px; transition: opacity 0.25s; }
+.skip.tight .skip-label { max-width: 0; }
+.skip.tight .skip-label > span { opacity: 0; }
+.skip.tight:hover .skip-label, .skip.tight:focus-visible .skip-label { max-width: 11.5em; }
+.skip.tight:hover .skip-label > span, .skip.tight:focus-visible .skip-label > span { opacity: 1; }
+.dial { width: 54px; height: 54px; display: grid; place-items: center; flex: none; }
+.dial svg { width: 42px; height: 42px; overflow: visible; }
+.ring-back { fill: none; stroke: currentColor; stroke-width: 3; opacity: 0.25; }
+.ring { fill: none; stroke: currentColor; stroke-width: 3; stroke-linecap: round; stroke-dasharray: 1; stroke-dashoffset: calc(1 - var(--p)); transform: rotate(-90deg); transform-origin: 50% 50%; }
+.arrow { fill: none; stroke: currentColor; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; translate: 0 calc(var(--nudge) * 1px); }
+
+/* Experience */
+.exp { background: var(--paper); color: var(--ink); padding-block: clamp(56px, 11svh, 120px); }
+.exp h2 { font: 700 min(14.2vw, 27svh)/0.9 var(--display); letter-spacing: -0.045em; margin-bottom: clamp(24px, 5svh, 56px); }
+.job { border-top: 2px solid var(--ink); }
+.job:last-of-type { border-bottom: 2px solid var(--ink); }
+.job summary { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.2fr) minmax(0, 0.9fr) 28px; gap: 4px 24px; align-items: baseline; padding-block: 20px; cursor: pointer; list-style: none; }
+.job summary::-webkit-details-marker { display: none; }
+.job h3 { font: 650 clamp(26px, 3.2vw, 44px)/1.05 var(--display); letter-spacing: -0.02em; }
+.plus { position: relative; width: 22px; height: 22px; align-self: center; justify-self: end; }
+.plus::before, .plus::after { content: ""; position: absolute; left: 0; right: 0; top: 10px; height: 2.5px; background: var(--ink); transition: rotate 0.3s var(--ease); }
+.plus::after { rotate: 90deg; }
+.job[open] .plus::after { rotate: 0deg; }
+.job-body { display: grid; gap: 12px; padding-bottom: 28px; max-width: 64ch; }
+.job-body ul { display: grid; gap: 8px; padding-left: 1.1em; list-style: disc; }
+.reach-for { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 2.1fr); gap: 12px 24px; margin-top: clamp(28px, 5svh, 52px); }
+.reach-for h3 { font: 650 clamp(22px, 2.2vw, 30px)/1.1 var(--display); letter-spacing: -0.015em; }
+.reach-for dl { margin: 0; display: grid; gap: 8px; }
+.reach-for dt { font-weight: 600; display: inline; }
+.reach-for dd { margin: 0; display: inline; }
+
+/* The end is my bench: a cutting mat, the seven stickers lying on it with a paper label each, and one line to ask on. */
+.end { --g: var(--bench); --i: var(--paper); --pencil: currentColor; min-height: 100svh; display: grid; grid-template-columns: minmax(0, 1fr); align-content: space-between; gap: clamp(48px, 10svh, 120px); background: linear-gradient(to right, var(--bench-line) 1px, transparent 1px) 0 0 / 32px 32px, linear-gradient(to bottom, var(--bench-line) 1px, transparent 1px) 0 0 / 32px 32px, var(--bench); color: var(--paper); padding-block: clamp(56px, 10svh, 110px) clamp(28px, 5svh, 56px); font-family: var(--display); }
+.end h2 { font-size: min(5.1vw, 8.2svh); line-height: 1.08; font-weight: 600; letter-spacing: -0.026em; max-width: 17em; text-wrap: balance; }
+.ask { display: grid; grid-template-columns: minmax(0, 1fr); gap: clamp(22px, 4svh, 44px); scroll-margin-top: 20px; }
+.ask-topics { --h: clamp(96px, 15vw, 220px); display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); align-items: end; gap: clamp(28px, 6svh, 60px) clamp(16px, 3vw, 48px); }
+.ask-topic, .ask-now { padding: 0; border: 0; background: none; cursor: pointer; }
+.ask-topic { display: grid; justify-items: start; }
+.ask-topic img { width: auto; height: auto; max-width: min(100%, calc(var(--h) * 1.5)); max-height: var(--h); rotate: var(--r); transition: rotate 0.35s var(--ease), scale 0.35s var(--ease), translate 0.35s var(--ease); }
+.ask-topic:hover:not(:disabled) img, .ask-topic:focus-visible img { scale: 1.1; rotate: calc(var(--r) * -1); translate: 0 -6%; }
+.ask-topic:active:not(:disabled) img { scale: 0.97; }
+.ask-topic:disabled, .ask-now:disabled, .ask-send:disabled { cursor: default; }
+.ask-tag { display: block; position: relative; margin-top: 0.1em; padding: 0.08em 0.55em 0.14em; background: var(--paper); color: var(--black); font: 600 clamp(19px, 1.9vw, 28px) / 1.1 var(--hand); text-align: left; white-space: nowrap; rotate: -2deg; box-shadow: 0 2px 5px rgb(0 0 0 / 0.28); }
+.ask-topics li:nth-child(even) .ask-tag { rotate: 1.5deg; }
+.ask-tag i { color: var(--pencil-on-light); font-style: normal; white-space: nowrap; }
+/* The eighth thing on the bench is a note. */
+.ask-now { justify-self: start; align-self: center; max-width: 9.5em; padding: 0.5em 0.7em 0.6em; background: var(--yellow); color: var(--black); font: 600 clamp(22px, 2.3vw, 34px) / 1.05 var(--hand); text-align: left; rotate: 2deg; box-shadow: 0 3px 8px rgb(0 0 0 / 0.3); transition: rotate 0.35s var(--ease), scale 0.35s var(--ease); }
+.ask-now:hover:not(:disabled), .ask-now:focus-visible { scale: 1.06; rotate: -1deg; }
+.ask-form { display: flex; align-items: center; gap: clamp(10px, 1.6vw, 24px); padding-bottom: 0.14em; border-bottom: 0.07em solid currentColor; font: 600 clamp(26px, 4.6vw, 68px) / 1.1 var(--display); letter-spacing: -0.026em; }
+.ask-form input { flex: 1; min-width: 0; padding: 0.1em 0; border: 0; border-radius: 0; background: transparent; letter-spacing: inherit; }
+.ask-form input::placeholder { color: color-mix(in oklab, currentColor 62%, transparent); opacity: 1; }
+.ask-send { flex: none; display: grid; place-items: center; width: 1.25em; height: 1.25em; min-width: 44px; min-height: 44px; border: 0; border-radius: 50%; background: var(--i); color: var(--g); cursor: pointer; transition: scale 0.3s var(--ease), background-color 0.3s, color 0.3s; }
+.ask-send svg { width: 52%; height: 52%; fill: none; stroke: currentColor; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+.ask-send:hover:not(:disabled) { scale: 1.08; }
+.ask-label { max-width: 46ch; font: 400 15px / 1.4 var(--read); }
+.ask-log { display: flex; flex-direction: column-reverse; gap: clamp(20px, 4svh, 40px); }
+.ask-log:empty { display: none; }
+.ask-exchange { display: grid; gap: 8px; justify-items: start; }
+.ask-question { font: 600 clamp(20px, 2.2vw, 30px) / 1.15 var(--display); letter-spacing: -0.012em; }
+.ask-answer { max-width: 34em; font: 400 clamp(18px, 1.5vw, 22px) / 1.45 var(--read); white-space: pre-wrap; overflow-wrap: anywhere; }
+.end-foot { display: grid; grid-template-columns: minmax(0, 1fr); gap: clamp(8px, 1.6svh, 16px); }
+.end-write { font-size: clamp(22px, 2.3vw, 33px); line-height: 1.14; font-weight: 600; letter-spacing: -0.012em; }
+.mail { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 24px; }
+.mail b { font-size: min(8vw, 122px); line-height: 1; font-weight: 700; letter-spacing: -0.04em; min-width: 0; overflow-wrap: anywhere; }
+.mail a { text-decoration: none; }
+@media (hover: hover) {
+  .mail a:hover { text-decoration: underline; text-decoration-thickness: 0.05em; }
+}
+.end .button { background: var(--i); color: var(--g); }
+.links { display: flex; flex-wrap: wrap; gap: 6px clamp(18px, 2.6vw, 40px); margin-top: clamp(8px, 2svh, 20px); font-size: clamp(20px, 2vw, 28px); font-weight: 600; letter-spacing: -0.015em; }
+
+/* Case studies */
+.study-band { background: var(--g); color: var(--i); font-family: var(--display); padding-bottom: clamp(32px, 6svh, 64px); }
+.study-head { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 0.55fr); gap: clamp(16px, 3vw, 40px); align-items: center; }
+.study-band h1 { font-size: min(13vw, 27svh); line-height: 0.9; font-weight: 700; letter-spacing: -0.045em; margin-block: clamp(16px, 4svh, 40px) clamp(12px, 3svh, 28px); }
+.study-lead { font-size: clamp(22px, 2.6vw, 38px); line-height: 1.14; font-weight: 600; letter-spacing: -0.012em; max-width: 24em; text-wrap: pretty; }
+.study-band .meta { margin-top: 18px; }
+.study-art { width: auto; max-height: 56svh; justify-self: center; }
+.study-body { background: var(--paper); color: var(--black); padding-block: clamp(40px, 8svh, 88px); display: grid; gap: clamp(40px, 7svh, 80px); }
+.study-body h2 { font: 700 clamp(34px, 5vw, 72px) / 1 var(--display); letter-spacing: -0.03em; margin-bottom: clamp(16px, 3svh, 32px); }
+.study-meta { display: grid; gap: 8px 32px; grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr)); }
+.study-meta dt { font-weight: 600; }
+.study-loop { aspect-ratio: 16 / 10; border-radius: var(--radius-tile); }
+.study-decisions { display: grid; gap: clamp(28px, 5svh, 48px); max-width: 44rem; }
+.study-decisions h3 { font: 650 clamp(24px, 2.6vw, 36px) / 1.1 var(--display); letter-spacing: -0.015em; margin-bottom: 8px; }
+.study-decisions dl { display: grid; gap: 8px; margin-top: 12px; }
+.study-decisions dt { color: var(--pencil); font: 600 var(--step-note) / 1 var(--hand); }
+.study-decisions dd { color: var(--ink-soft); }
+.study-flow, .study-list { display: grid; gap: 10px; max-width: 44rem; padding-left: 1.3em; }
+.study-flow { list-style: decimal; }
+.study-list { list-style: disc; }
+.study-next { display: grid; gap: 6px; padding-block: clamp(32px, 7svh, 72px); background: var(--g); color: var(--i); font: 700 min(11vw, 22svh) / 0.95 var(--display); letter-spacing: -0.04em; text-decoration: none; }
+.study-next span { font: 600 clamp(16px, 1.5vw, 22px) / 1.2 var(--read); letter-spacing: 0; }
+.apart { background: var(--paper); color: var(--black); }
+
+@media (max-width: 760px) {
+  .say h1 { font-size: min(9.3vw, 4.7svh); }
+  .stop { --name-size: 14vw; }
+  .name { font-size: 14vw; }
+  .more { align-self: start; max-width: 100%; margin-top: 6px; font-size: 15px; line-height: 1.38; }
+  .stop-copy { padding-bottom: 88px; }
+  .about { font-size: clamp(20px, 5.6vw, 24px); gap: 10px; max-width: 100%; }
+  .sub { font-size: 15px; }
+  .meta { font-size: 15px; }
+  .still { right: 8%; left: 8%; top: 47%; margin-inline: auto; max-width: 84vw; max-height: 40svh; }
+  .macstill { height: 40svh; }
+  .job summary { grid-template-columns: minmax(0, 1fr) 28px; }
+  .job summary .role, .job summary .when { grid-column: 1; }
+  .job summary .plus { grid-column: 2; grid-row: 1; }
+  .reach-for { grid-template-columns: minmax(0, 1fr); }
+  .end h2 { font-size: min(8.4vw, 5svh); }
+  .ask-topics { --h: 30vw; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .ask-tag { font-size: 18px; }
+  .ask-tag i { display: block; }
+  .mail b { font-size: 7.5vw; }
+}
+@media (max-width: 760px) and (max-height: 700px) {
+  .more { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { transition: none !important; animation: none !important; }
 }
 
-.colophon {
-  display: grid;
-  gap: 0.5em;
-  max-width: 62ch;
-  color: var(--ink-soft);
-  font-size: var(--step-small);
-}
-
-.colophon h2 {
-  color: var(--ink);
-  font: inherit;
-  font-weight: 600;
-}
-
-/* Small things that move with the scroll. Without scroll timelines each simply rests in its final place. */
-@supports (animation-timeline: view()) {
-  @media (prefers-reduced-motion: no-preference) {
-    .marker {
-      animation: marker-wipe linear both;
-      animation-timeline: view();
-      animation-range: entry 70% cover 45%;
-    }
-
-    .pbx-box,
-    .puzzle-car {
-      animation: rise linear both;
-      animation-timeline: view();
-      animation-range: entry 0% cover 40%;
-    }
-
-    .mac-hand {
-      animation: hand-in linear both;
-      animation-timeline: view();
-      animation-range: entry 30% cover 55%;
-    }
-  }
-}
-
-@keyframes marker-wipe {
-  from {
-    background-size: 0% 62%;
-  }
-
-  to {
-    background-size: 100% 62%;
-  }
-}
-
-@keyframes rise {
-  from {
-    translate: 0 14%;
-  }
-}
-
-@keyframes hand-in {
-  from {
-    translate: 40% 0;
-  }
+@media (max-width: 760px) {
+  .study-head { grid-template-columns: minmax(0, 1fr); }
+  .study-art { max-height: 38svh; }
 }

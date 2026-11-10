@@ -22,7 +22,8 @@
     "node-fetch": "^2.6.7",
     "nodemon": "^3.1.11",
     "react": "19.1.10",
-    "react-dom": "19.1.10"
+    "react-dom": "19.1.10",
+    "three": "0.147.0"
   },
   "engines": {
     "node": ">=22.18.0"

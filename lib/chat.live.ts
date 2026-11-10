@@ -107,3 +107,10 @@ test("the prompt cache is read on repeat calls, and nothing was refused", { skip
   const stops = bodies.flatMap((body) => [...body.matchAll(/"stop_reason":\s*"(\w+)"/g)].map((match) => match[1]));
   assert.deepEqual(stops.filter((stop) => stop !== "end_turn"), []);
 });
+
+test("what I'm working on comes from GitHub", async () => {
+  const text = await (await post({ query: "What are you working on right now?" })).text();
+  const repos: { name: string; fork: boolean }[] = await (await fetch("https://api.github.com/users/hridyeshh/repos?type=owner&sort=pushed&per_page=12")).json();
+  const names = repos.filter((repo) => !repo.fork).map((repo) => repo.name.toLowerCase().split("-")[0]);
+  assert.ok(names.some((name) => text.toLowerCase().includes(name)), text);
+});

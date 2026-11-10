@@ -10,15 +10,15 @@ People who judge software for a living: engineering leads, technical founders, a
 
 ## Product Purpose
 
-The personal site of Hridyesh. Its one message: every layer of software is a design problem, from interface to schema. It proves that with real projects taken apart, showing the decision at each layer, what was rejected, what it cost, and what I'd change. Success looks like a skeptical reader opening a case study within forty seconds because they want to see how the work was made, then writing an email.
+The personal site of Hridyesh. It says what I make in one plain sentence, then walks through all seven projects, one object at a time, each with parts that really move. Case studies show the decisions underneath: what was rejected, what it cost, and what I'd change. Success looks like a skeptical reader opening a case study within forty seconds because they want to see how the work was made, then asking the chat a question or writing an email.
 
 ## Brand Personality
 
-Tactile, exact, wry.
+Tactile, exact, plain.
 
 - **Tactile:** the work appears as objects you can hold, like a Mac, a notebook, a stack of sheets, a pair of hands.
 - **Exact:** every claim is specific and checkable. Backend decisions get the same care as the interface, in the same voice.
-- **Wry:** copy has a turn in it, and earns every word. "A diary, not a database." "Read the web. Keep the parts that matter." "Built like a product, not a template."
+- **Plain:** lead with the real things in plain words. A reader should never have to decode an idea to see the work.
 
 The feeling to leave behind: whoever made this thought about everything, and enjoyed it.
 
@@ -29,11 +29,11 @@ The feeling to leave behind: whoever made this thought about everything, and enj
 - **Imageless editorial monochrome:** display serif, small mono labels, ruled columns, no pictures. Saturated, and wrong for work this physical.
 - **Blueprint-grid wallpaper and mono labels above every section:** a costume of technical seriousness.
 - **Agency language and client logo walls.**
-- **Instrument (instrument.com):** borrow its mechanics (pill nav split around content, giant wordmark, condensed statements, rounded media tiles with tag chips, color changes between sections). Do not borrow its look, its typeface, or its plum.
+- **Clever concepts:** metaphors and thesis lines that are about the design instead of the work.
 
 ## Design Principles
 
-1. **Show the layers, don't claim them.** Any statement about depth has a figure beside it that opens the thing up: surface, client, API, data.
+1. **Show the things, don't claim them.** Each project appears as an object you can watch work. Claims about depth live in case studies, next to a figure that opens the thing up.
 2. **Every recommendation carries its reason.** A decision is only interesting with what was rejected and what it cost next to it.
 3. **Let the work carry the color.** Each project keeps its own palette and composition. Site chrome stays out of the way.
 4. **Objects before abstractions.** Reach for something you could pick up before reaching for a diagram or an icon.
@@ -42,4 +42,4 @@ The feeling to leave behind: whoever made this thought about everything, and enj
 
 ## Accessibility & Inclusion
 
-WCAG 2.2 AA, including contrast and full keyboard use. Every motion has a still version with the same content, shown under `prefers-reduced-motion` and where scroll timelines are unsupported (Firefox). All content is readable with JavaScript disabled. Typography favors legibility on purpose: the body face comes from the Braille Institute, which connects to the braille devices the author builds at work, and the colophon says so.
+WCAG 2.2 AA, including contrast and full keyboard use. Every motion has a still version with the same content, shown under `prefers-reduced-motion`, without WebGL, on a struggling device, and where scroll timelines are unsupported (Firefox). All content is readable with JavaScript disabled. Typography favors legibility on purpose: the body face comes from the Braille Institute, which connects to the braille devices the author builds at work.

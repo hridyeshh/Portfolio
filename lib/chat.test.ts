@@ -12,9 +12,9 @@ const assistant = (text: string): Turn => ({ role: "assistant", content: text })
 
 // ---- A fake Anthropic API that speaks server-sent events
 
-type Reply = { thinking?: boolean; text?: string[]; stop?: string; hang?: boolean };
+type Reply = { thinking?: boolean; text?: string[]; stop?: string; hang?: boolean; tool?: boolean };
 
-function sse(res: ServerResponse, { thinking, text = ["ok"], stop = "end_turn", hang }: Reply) {
+function sse(res: ServerResponse, { thinking, text = ["ok"], stop = "end_turn", hang, tool }: Reply) {
   const write = (event: Record<string, unknown>) => res.write(`event: ${event.type}\ndata: ${JSON.stringify(event)}\n\n`);
   res.writeHead(200, { "content-type": "text/event-stream" });
   write({
@@ -33,6 +33,12 @@ function sse(res: ServerResponse, { thinking, text = ["ok"], stop = "end_turn", 
     for (const chunk of text) write({ type: "content_block_delta", index, delta: { type: "text_delta", text: chunk } });
     if (hang) return;
     write({ type: "content_block_stop", index });
+  }
+  if (tool) {
+    const at = index + (text.length ? 1 : 0);
+    write({ type: "content_block_start", index: at, content_block: { type: "tool_use", id: "toolu_test", name: "recent_github_activity", input: {} } });
+    write({ type: "content_block_delta", index: at, delta: { type: "input_json_delta", partial_json: "{}" } });
+    write({ type: "content_block_stop", index: at });
   }
   write({ type: "message_delta", delta: { stop_reason: stop, stop_sequence: null }, usage: { output_tokens: 1 } });
   write({ type: "message_stop" });
@@ -169,7 +175,7 @@ test("prompt carries every project and job, and nothing claims to be live early"
   assert.match(prompt, /Swift,/);
   assert.match(prompt, /launching on the App Store and Play Store by December 2026/);
   assert.match(prompt, /launching November 2026/);
-  assert.match(prompt, /not deployed yet/);
+  assert.doesNotMatch(prompt, /not deployed/i);
   assert.match(prompt, /neither confirm nor deny/);
   assert.ok(prompt.length > 2048, "too short to reach the 512-token cache minimum");
   assert.equal(prompt, systemPrompt(), "the cache needs identical bytes");
@@ -200,6 +206,8 @@ test("sends the exact request the model accepts", async () => {
   assert.deepEqual(body.output_config, { effort: "low" });
   assert.deepEqual(body.system, [{ type: "text", text: systemPrompt(), cache_control: { type: "ephemeral" } }]);
   assert.deepEqual(body.messages, [user("first"), assistant("second"), user("third")]);
+  assert.equal((body.tools as { name: string }[])[0].name, "recent_github_activity");
+  assert.equal("tool_choice" in body, false);
   for (const forbidden of ["temperature", "top_p", "top_k", "thinking", "fallbacks"]) assert.equal(forbidden in body, false, forbidden);
 });
 
@@ -232,6 +240,51 @@ for (const [name, reply] of noAnswers) {
 test("a refusal after partial text ends with the fallback, because the text already went out", async () => {
   fake.respond = (res) => sse(res, { text: ["partial"], stop: "refusal" });
   assert.equal(await (await ask({ query: "hi" })).text(), `partial\n\n${content.chatMessages.fallback}`);
+});
+
+// ---- GitHub, the chat's one tool
+
+const toolThenAnswer = (answer: string) => (res: ServerResponse) => sse(res, fake.requests.length === 1 ? { tool: true, text: [], stop: "tool_use" } : { text: [answer] });
+type Sent = { role: string; content: Record<string, unknown>[] };
+const secondRound = () => fake.requests[1].messages as Sent[];
+
+// Runs before the success test, because a good answer is cached.
+test("when GitHub can't be reached, the model is told and still answers, without a second tool call", async (t) => {
+  t.mock.method(console, "error", () => {});
+  t.mock.method(globalThis, "fetch", async () => new Response("{}", { status: 503 }));
+  fake.respond = toolThenAnswer("I can't check GitHub right now.");
+  assert.equal(await (await ask({ query: "what's new?" })).text(), "I can't check GitHub right now.");
+  assert.deepEqual(fake.requests[1].tool_choice, { type: "none" });
+  assert.equal(secondRound().at(-1)?.content[0].is_error, true);
+});
+
+test("the tool shows recent public work only, and the token stays on the server", async (t) => {
+  process.env.GITHUB_TOKEN = "test-github-token";
+  process.env.GITHUB_HIDE = "Hidden-One, other";
+  t.after(() => {
+    delete process.env.GITHUB_TOKEN;
+    delete process.env.GITHUB_HIDE;
+  });
+  const repo = (name: string, extra = {}) => ({ name, description: `about ${name}`, language: "Go", html_url: `https://github.com/hridyeshh/${name}`, pushed_at: new Date().toISOString(), fork: false, archived: false, private: false, ...extra });
+  const repos = [repo("new-thing"), repo("a-fork", { fork: true }), repo("hidden-one"), repo("old", { pushed_at: "2020-01-01T00:00:00Z" }), repo("leak", { private: true }), repo("shelved", { archived: true })];
+  const tokens: unknown[] = [];
+  t.mock.method(globalThis, "fetch", async (url: string | URL | Request, init?: RequestInit) => {
+    tokens.push((init?.headers as Record<string, string>).authorization);
+    return Response.json(String(url).includes("/commits") ? [{ commit: { message: "fix sync\n\nthe long body" } }] : repos);
+  });
+  fake.respond = toolThenAnswer("Mostly new-thing.");
+  const answer = await (await ask({ query: "what are you working on?" })).text();
+  assert.equal(answer, "Mostly new-thing.");
+
+  assert.equal(secondRound().at(-2)?.role, "assistant");
+  assert.equal(secondRound().at(-2)?.content[0].type, "tool_use");
+  const [result] = secondRound()[secondRound().length - 1].content;
+  assert.equal(result.tool_use_id, "toolu_test");
+  const { repos: shown } = JSON.parse(result.content as string) as { repos: { name: string; recentCommits: string[] }[] };
+  assert.deepEqual(shown.map(({ name }) => name), ["new-thing"]);
+  assert.deepEqual(shown[0].recentCommits, ["fix sync"]);
+  assert.ok(tokens.length && tokens.every((token) => token === "Bearer test-github-token"));
+  assert.equal(JSON.stringify(fake.requests).includes("test-github-token"), false, "token sent to the model");
 });
 
 // ---- Upstream failures. A 404 here is the outage that took the old chat down: model_not_found.

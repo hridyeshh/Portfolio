@@ -1,87 +1,72 @@
 # Design
 
-The chosen direction: a cyanotype ground, a full-bleed "Hridyesh" wordmark, and the headline written on the sheet the painted hands are lifting, beside staggered project tiles.
+The chosen direction: one big sentence that says what I make, then seven coloured sheets that slide over each other, each with one 3D object pinned on it. Picked from a working prototype on 2026-11-07.
 
 ## Visual Theme & Atmosphere
 
-**Idea: all the way down.** Headline: *I design software all the way down.* Support: *Users feel every layer. So I design every layer.*
+**Lead with the real things, in plain words.** No thesis lines, riddles or notes that promise an action. One idea per screen.
 
-**Signature: take it apart.** Scrolling splits a product into flat sheets at depth (Surface, Client, API, Data), each showing one real decision, with data running down a trace between them.
+**Signature:** objects whose parts really move with your scroll. A box opens, a pencil marks a line, a floppy boots a Mac, a car drives, wings flap with scroll speed, a keychain swings. Each is a toy built in code with painted textures, or the game's own model for the car.
 
-**Scene:** a technical lead at 9pm on a laptop in a dim room, a dozen tabs open, skeptical, giving this forty seconds. A white page would glare and another near-black page would vanish among the other tabs, so the ground is a deep saturated blue.
-
-**Color strategy:** Committed, with Drenched project chapters. One art-directed theme, no toggle.
+**Depth:** every object casts a soft shadow on its sheet, and the big name sits under the object while the copy sits over it.
 
 ## Color Palette & Roles
 
-Define as tokens. Raw hex or px in `.tsx` fails lint. No pure `#000` or `#fff` anywhere in the interface. Mix tones with `color-mix(in oklab, ...)`: in oklch, the hue arc from paper to cyanotype runs through green.
+Define as tokens. Raw hex or px in `.tsx` fails lint.
 
-### Brand
-
-| Token | Value | Role |
+| Where | Ground | Ink |
 |---|---|---|
-| `--cyanotype` | `oklch(0.27 0.085 258)` | Main ground |
-| `--paper` | `oklch(0.95 0.018 85)` | Type on cyanotype; ground for reading pages. 13.1:1 together |
-| `--pencil-on-dark` | `oklch(0.74 0.15 32)` | Red pencil on cyanotype: margin notes, focus. 6.2:1 |
-| `--pencil-on-light` | `oklch(0.50 0.18 29)` | Red pencil on any light ground. At least 5.6:1 |
+| The Sentence | `--yellow` `#ffd93b` | `--black` `#141210` |
+| The end, my bench | `--bench` `#2f5c4a` | `--paper` |
+| Paperboxd | `#cc3620` (4.5:1 with its cream) | `#fdf6e8` |
+| stickynotes | `#f2f2f2` | `#201f1d` |
+| thelocalcode | `#7f78c5` | `#151513` |
+| puzzlecafe | `#e9c46a` | `#0b0d10` |
+| Desky | `#14231c`, so the screens glow | `#e8f3ea` |
+| Butterfly clutcher | `#f4b6cf`, because the wings are lavender | `#1c1830` |
+| Pixel keychain | `#a8d8f0` | `#0e2430` |
+| Experience and case study reading | `--paper` `#f4f3ef` | `--black` |
 
-### Project chapters
-
-Each chapter is full-bleed in its own palette. Site chrome stays neutral.
-
-| Project | Ground | Ink | Accent |
-|---|---|---|---|
-| Paperboxd | `#F2EDE1` | `#151513`, muted `#6A6456` | `#C0271C` for text (5.07:1); `#D23B26` only for large type and art (4.09:1) |
-| stickynotes | `#f2f2f2`, sampled from `sticky-hands.jpg` so the painting has no visible edge | `#201f1d` | `#b68235` for art and large shapes only |
-| thelocalcode | `#7f78c5` | `#151513` (4.70:1) | Red fails on this ground at every lightness: use ink for margin notes |
-| thelocalcode finale | `#194d15` | `--paper` (8.6:1) | `oklch(0.78 0.13 32)` for margin notes (4.7:1) |
-| puzzlecafe | `#e9c46a` | `#0b0d10` (11.7:1) | Ink for margin notes. Art: the gouache toy car held in a hand |
+Sheets set `--g` and `--i` through `.tone-<slug>`, and the skip button inverts them.
 
 ## Typography Rules
 
 | Role | Family | Use |
 |---|---|---|
-| Display | Libre Caslon Condensed | Wordmark, statements, project names. Enormous and tight |
-| Body | Atkinson Hyperlegible Next | Running text, nav, chips. Lines capped at 65 to 75ch |
-| Margin | Caveat | Red-pencil notes only, a few words at a time |
-| Figure | Atkinson Hyperlegible Mono | Only inside figures, where content really is code |
+| Display | Bricolage Grotesque | The Sentence, project names, plain lines |
+| Body | Atkinson Hyperlegible Next | Paragraphs, nav, status |
+| Hand | Caveat | Labels painted on objects, and short notes |
+| Figure | Atkinson Hyperlegible Mono | Screens and figures, where content really is code |
+| Spines | Libre Caslon Condensed | Book spines and take-apart figures only |
 
-- Fluid sizes with `clamp()` and at least a 1.25 ratio between steps.
-- The wordmark is "Hridyesh" alone, with no surname. It runs full-bleed: its size comes from the container width times `--fit-wordmark`, the string's measured width, so it fills the measure at every width and a scrollbar can't push it off the edge. Remeasure if the string or the face changes. The tail of the `y` hangs below the tight line box, so leave room or let art cover it on purpose.
-- Libre Caslon Condensed is self-hosted from `app/fonts/`, because `next/font` doesn't list it.
-- On cyanotype, add 0.05 to 0.1 to line-height: light type reads thinner.
-- Copy has no em dashes. All copy lives in `lib/content.ts`.
+Copy has no em dashes. All copy lives in `lib/content.ts`.
 
 ## Component Stylings
 
-- **Pill nav:** two pills split around the content, not a bar. Must fit inside a 390px viewport.
-- **Tag chip:** pill on a media tile, for example `CASE STUDY · 6 MIN`. The one place small caps with tracking are allowed.
-- **Media tile:** rounded image tile, staggered in size and offset. Never an identical grid.
-- **Margin note:** Caveat in red pencil, slightly rotated, next to what it annotates.
-- **Take-apart figure:** one data-driven component of SVG layers using `preserve-3d`; a `.signal` dash runs down the trace. The still version shows every layer at once.
+- **Sentence:** each phrase carries a small die-cut sticker. A tap gives the page that project's colour, brings the sticker forward, then cuts to its sheet.
+- **Sheet:** big name, a short paragraph in the open space, one plain line, status pill, links. Links appear only when live.
+- **Skip button:** bottom right, for the journey only. Compact with a filling ring while scrolling, opens to "Skip to experience" half a second after you stop. Stays open under reduced motion.
 - **Experience rows:** native `<details>`.
-- **Ask:** inline chat in the page, never a modal. Labeled as an AI answering from this site's content.
+- **Ask:** the end is my bench. A green cutting mat (`--bench`, with a faint mat grid, the one place a grid is allowed), the seven stickers lying on it with a paper label each (name, and status in red hand). Picking one up asks about its project, and one line at Sentence size takes any other question. Inline, never a modal, labeled as an AI. It can look up my public GitHub.
+- **Case study:** coloured band, then decisions with what was rejected and what it cost. The take-apart figure lives here, not on home.
 
-## Layout Principles
+## 3D and motion
 
-- One dominant idea per fold. Each chapter has its own composition, so no two read alike.
-- Generous gaps between chapters, tight groupings inside them. Vary rhythm with `clamp()`.
-- Art bleeds off the frame edges; arms enter from the sides so narrow screens crop to the middle.
-
-## Depth & Elevation
-
-Depth comes from objects and paper, not from UI chrome. Flat sheets at real depth for the take-apart figure, soft painted shadows in the art. No glass, no blur, no decorative drop shadows on cards.
+- One renderer on one sticky canvas, loaded after the Sentence, paused off screen, pixel ratio capped.
+- Native scrolling, never scroll-jacking. Objects move with their sheet at its edges, and pin in between.
+- `three` is pinned to 0.147.0, because the lights and colours were tuned and approved there. Newer versions change both, so retune when bumping.
+- Reduced motion, no WebGL, no JavaScript or a struggling device get painted stills with the same words.
 
 ## Do's and Don'ts
 
-**Do:** draw anything that zooms or comes apart as SVG. Ease out with exponential curves. Prefer CSS scroll timelines over script. Show recordings of real work, with a pause button and a still poster.
+**Do:** show real recordings and real models. Keep objects in one toy-like painted style.
 
-**Don't:** show a photo of the author, use gradient text, glass cards, custom cursors, three.js on the page, blueprint grids, side-stripe borders, identical card grids, hero metrics, a mono label above every section, or a client logo wall.
+**Don't:** show a photo of the author, use tiles, gradient text, glass cards, custom cursors, blueprint grids, hero metrics or a client logo wall.
 
 ## Responsive Behavior
 
-Check at 390, 768 and 1440px with no horizontal overflow. The wordmark and statements stay enormous on a phone and stack with the art; tiles stay staggered in two columns on a phone and one row on a tablet. Reduced motion, unsupported browsers and phones get still versions carrying the same content; `scripts/check.mjs` fails if pinned copy stops fitting its stage.
+`scripts/check.mjs` covers 320, 390, 768, 1024 and 1440 wide: no sideways scroll, and each sheet's paragraph clear of its name and copy. On phones the paragraph sits under the name, and on very short phones it hides, with the plain line still showing.
 
 ## Agent Prompt Guide
 
-Read `PRODUCT.md` first. Every color comes from a token above. Before adding anything, ask whether it could appear on any other developer's portfolio; if so, make it specific to this work or remove it.
+Read `PRODUCT.md` first. Every color comes from a token. Before adding anything, ask whether it could appear on any other developer's portfolio; if so, make it specific to this work or remove it.
